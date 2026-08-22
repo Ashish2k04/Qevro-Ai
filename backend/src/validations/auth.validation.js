@@ -15,9 +15,9 @@ const authValidation = function(req,res,next){
 
 
 export const validate = [
-    body('username').isString().withMessage('Invalid username format!'),
-    body('email').isEmail().withMessage('Invalid email format it should be test@example.com'),
-    body('password').isLength({min: 6, max: 12}).withMessage('Password Should be 6 to 12 characters long!'),
+    body('username').trim().notEmpty().withMessage('Username is required!').matches(/^[a-zA-Z0-9_]+$/).withMessage("Username can only contain letters, numbers and underscores").isLength({min: 3, max: 30}).withMessage('Minimum 3 and Maximum 30 characters required!'),
+    body('email').trim().notEmpty().withMessage('Email is required!').isEmail().withMessage('Invalid email format it should be test@example.com'),
+    body('password').notEmpty().withMessage('Password is Required!').isLength({min: 6, max: 12}).withMessage('Password Should be 6 to 12 characters long!'),
     authValidation
 ];
 

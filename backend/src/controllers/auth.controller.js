@@ -15,7 +15,9 @@ async function registerCtrl(req,res,next) {
 
         if(isExists){
             return res.status(409).json({
-                message: "User already exists."
+                message: "User already exists.",
+                success: false,
+                err: "User already exists"
             });
         };
 

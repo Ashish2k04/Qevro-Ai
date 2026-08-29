@@ -202,7 +202,7 @@ async function getMeController(req,res,next) {
         })
     }
     return res.status(200).json({
-        message: "All good token working!",
+        message: "User fetched.",
         success: true,
         user
     })

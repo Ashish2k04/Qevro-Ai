@@ -128,4 +128,8 @@ async function verifyEmail(req,res,next) {
 
 }
 
-export {registerCtrl, verifyEmail};
+async function loginCtrl(req,res,next){
+
+}
+
+export {registerCtrl, verifyEmail, loginCtrl};

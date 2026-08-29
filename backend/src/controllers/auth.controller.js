@@ -1,9 +1,6 @@
-import userModel from '../models/user.model.js';
-
-import jwt from 'jsonwebtoken';
-
 import 'dotenv/config';
-
+import userModel from '../models/user.model.js';
+import jwt from 'jsonwebtoken';
 import { sendEmail } from '../services/mail.service.js';
 
 async function registerCtrl(req,res,next) {
@@ -129,7 +126,47 @@ async function verifyEmail(req,res,next) {
 }
 
 async function loginCtrl(req,res,next){
+    try{
+        const {email, password} = req.body;
 
+        const isUserExists = await userModel.findOne({email});
+
+        if(!isUserExists){
+            return res.status(404).json({
+                message: "User don't exists.",
+                success: false
+            })
+        }
+
+        const decodePassword = await isUserExists.comparePassword(password);
+
+        if(!decodePassword){
+            return res.status(400).json({
+                message: "Invalid Email or Password.",
+                success: false
+            })
+        }
+
+        if(!isUserExists.verified){
+             return res.status(403).json({
+                message: "Please verify your email before loggin.",
+                success: false
+            })
+        }
+
+        return res.status(200).json({
+            message: "Loggin Successful.",
+            success: true,
+            info: {
+                username: isUserExists.username,
+                email: isUserExists.email
+            }
+        })
+    }
+    catch(err){
+        err.status = 500;
+        next(err);
+    }
 }
 
 export {registerCtrl, verifyEmail, loginCtrl};

@@ -6,7 +6,7 @@ async function handleErrors(err, req, res, next) {
     }
 
     if(process.env.ENVIRONMENT === 'development'){
-       return response.stack = err.stack
+       response.stack = err.stack
     }
 
     return res.status(err.status).json(response);

@@ -188,5 +188,30 @@ async function verifyEmail(req,res,next) {
 
 }
 
+async function getMeController(req,res,next) {
+    try{
+    const userId = req.user.id;
 
-export {registerCtrl, verifyEmail, loginCtrl};
+    const user = await userModel.findById(userId).select("-password");
+
+    if(!user){
+        return res.status(404).json({
+            message: "User not found.",
+            success: false,
+            error: "Invalid or missing token."
+        })
+    }
+    return res.status(200).json({
+        message: "All good token working!",
+        success: true,
+        user
+    })
+}
+  catch(err){
+    err.status = 500;
+    next(err)
+  }
+}
+
+
+export {registerCtrl, verifyEmail, loginCtrl, getMeController};

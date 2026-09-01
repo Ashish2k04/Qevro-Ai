@@ -215,5 +215,3 @@ async function getMeController(req,res,next) {
 
 
 export {registerCtrl, verifyEmail, loginCtrl, getMeController};
-
-upd

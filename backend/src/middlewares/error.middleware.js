@@ -13,5 +13,3 @@ async function handleErrors(err, req, res, next) {
 }
 
 export default handleErrors;
-
-d

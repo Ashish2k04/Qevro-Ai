@@ -14,14 +14,18 @@ const model_2 = new ChatGoogleGenerativeAI({
     maxRetries: 0
 });
 
+const model = model_1.withFallbacks({
+    fallbacks:[
+        model_2
+    ]
+})
+
 export async function testApi() {
     try {
-        const res = await model_1.invoke("What is Ai?");
-        console.log("Response from groq:", res.text);
+        const res = await model.invoke("What is Ai?");
+        console.log("Response:", res.text);
 
     } catch (err) {
-        console.error("Groq failed, using gemini flash.");
-        const res = await model_2.invoke("What API provider am I calling?");
-        console.log("Response from gemini:", res.text);
+        console.error("Something went wrong in AI models:", err.message);
     }
 }

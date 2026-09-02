@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import {ChatGoogleGenerativeAI} from '@langchain/google-genai';
 import { ChatGroq } from "@langchain/groq";
+import { ChatMistralAI } from "@langchain/mistralai";
 
 const model_1 = new ChatGroq({
     model:  "openai/gpt-oss-120b",
@@ -14,15 +15,22 @@ const model_2 = new ChatGoogleGenerativeAI({
     maxRetries: 0
 });
 
-const model = model_1.withFallbacks({
+const model_3 = new ChatMistralAI({
+    model: "mistral-large-latest",
+    apiKey: process.env.MISTRAL_API_KEY,
+    maxRetries: 0
+});
+
+const model = model_3.withFallbacks({
     fallbacks:[
-        model_2
+        model_1,
+        model_3
     ]
 })
 
 export async function testApi() {
     try {
-        const res = await model.invoke("What is Ai?");
+        const res = await model.invoke("What is Ai? Explain in one line.");
         console.log("Response:", res.text);
 
     } catch (err) {

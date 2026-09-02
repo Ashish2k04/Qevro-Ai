@@ -24,7 +24,7 @@ const model_3 = new ChatMistralAI({
 const model = model_3.withFallbacks({
     fallbacks:[
         model_1,
-        model_3
+        model_2
     ]
 })
 

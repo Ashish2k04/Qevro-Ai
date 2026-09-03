@@ -20,7 +20,7 @@ const model = model_1.withFallbacks({
     fallbacks:[model_2]
 })
 
-export async function testApi(PROMPT) {
+export async function askAi(PROMPT) {
     try {
         const res = await model.invoke(PROMPT);
         console.log("Response:", res.text);

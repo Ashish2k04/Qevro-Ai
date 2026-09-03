@@ -213,5 +213,15 @@ async function getMeController(req,res,next) {
   }
 }
 
+async function callingAi(req,res,next) {
+    const {question} = req.body;
 
-export {registerCtrl, verifyEmail, loginCtrl, getMeController};
+    return res.status(201).json({
+        message: "Your question created successfully.",
+        success: true,
+        question
+    });
+}
+
+
+export {registerCtrl, verifyEmail, loginCtrl, getMeController, callingAi};

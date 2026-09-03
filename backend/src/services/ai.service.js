@@ -20,10 +20,11 @@ const model = model_1.withFallbacks({
     fallbacks:[model_2]
 })
 
-export async function testApi() {
+export async function testApi(PROMPT) {
     try {
-        const res = await model.invoke("let me know which ai model you're?");
+        const res = await model.invoke(PROMT);
         console.log("Response:", res.text);
+        return res.text;
 
     } catch (err) {
         console.error("Something went wrong in AI models:", err);

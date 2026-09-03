@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const messageSchema = new Schema({
+const messageSchema = new mongoose.Schema({
     chat: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'chats',

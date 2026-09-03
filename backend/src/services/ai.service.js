@@ -5,12 +5,14 @@ import { ChatGroq } from "@langchain/groq";
 const model_1 = new ChatGroq({
     model:  "openai/gpt-oss-120b",
     apiKey: process.env.GROQ_API_KEY,
+    temperature: 0,
     maxRetries: 0
 });
 
 const model_2 = new ChatGoogleGenerativeAI({
     model: "gemini-3.5-flash-lite",
     apiKey: process.env.GEMINI_API_KEY,
+    temperature: 0,
     maxRetries: 0
 });
 

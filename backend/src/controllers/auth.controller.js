@@ -2,6 +2,7 @@ import 'dotenv/config';
 import userModel from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../services/mail.service.js';
+import { testApi } from '../services/ai.service.js';
 
 /*
 @route POST /api/register
@@ -213,15 +214,22 @@ async function getMeController(req,res,next) {
   }
 }
 
-async function callingAi(req,res,next) {
+async function callingAiController(req,res,next) {
+    try{
     const {question} = req.body;
+    const ai_answer = await testApi(question)
 
     return res.status(201).json({
-        message: "Your question created successfully.",
+        message: "Your answer created successfully.",
         success: true,
-        question
+        answer: ai_answer
     });
-}
+   }
+   catch(err){
+      err.status = 500;
+      next(err)
+   }
+};
 
 
-export {registerCtrl, verifyEmail, loginCtrl, getMeController, callingAi};
+export {registerCtrl, verifyEmail, loginCtrl, getMeController, callingAiController};

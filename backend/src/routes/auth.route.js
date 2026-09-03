@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {registerCtrl, verifyEmail, loginCtrl, getMeController, callingAi} from '../controllers/auth.controller.js'
+import {registerCtrl, verifyEmail, loginCtrl, getMeController, callingAiController} from '../controllers/auth.controller.js'
 import {Registervalidator, Loginvalidator} from '../validations/auth.validation.js'
 import {tokenVerification} from '../middlewares/auth.middleware.js';
 
@@ -9,8 +9,7 @@ authRouter.post('/register', Registervalidator, registerCtrl);
 authRouter.post('/login', Loginvalidator, loginCtrl);
 authRouter.get('/verify-email', verifyEmail);
 authRouter.get('/get-me', tokenVerification, getMeController);
-
-authRouter.post('/ai', callingAi);
+authRouter.post('/ai', tokenVerification, callingAiController);
 
 export default authRouter;
 

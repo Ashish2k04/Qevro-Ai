@@ -22,7 +22,7 @@ const model = model_1.withFallbacks({
 
 export async function testApi(PROMPT) {
     try {
-        const res = await model.invoke(PROMT);
+        const res = await model.invoke(PROMPT);
         console.log("Response:", res.text);
         return res.text;
 

@@ -21,32 +21,18 @@ const model_3 = new ChatMistralAI({
     maxRetries: 0
 });
 
-// const model = model_3.withFallbacks({
-//     fallbacks:[
-//         model_1,
-//         model_2
-//     ]
-// })
-
-// export async function testApi() {
-//     try {
-//         const res = await model.invoke("let me know which ai model you're?");
-//         console.log("Response:", res.text);
-
-//     } catch (err) {
-//         console.error("Something went wrong in AI models:", err.message);
-//     }
-// }
-
+const model = model_1.withFallbacks({
+    fallbacks:[model_2, model_3]
+})
 
 export async function testApi() {
     try {
-        const res = await model_3.invoke("let me know which ai model you're?");
-        console.log("Response from mistral:", res.text);
+        const res = await model.invoke("let me know which ai model you're?");
+        console.log("Response:", res.text);
 
     } catch (err) {
-        console.error("Mistral failed.");
-        const res = await model_1.invoke("let me know which ai model you're?");
-        console.log("Response from groq:", res.text);
+        console.error("Something went wrong in AI models:", err);
     }
 }
+
+

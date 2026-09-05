@@ -24,5 +24,8 @@ app.get('*name', (req,res)=>{
     })
 })
 
+/*
+@des: To catch all the errors inside the handleErrors middleware file
+*/
 app.use(handleErrors);
 export default app;

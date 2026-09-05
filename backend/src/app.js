@@ -15,6 +15,9 @@ app.get('/', (req,res)=>{
 
 app.use('/api', authRouter);
 
+/*
+@des: This route belongs to the unknown requests
+*/
 app.get('*name', (req,res)=>{
     return res.json({
         message: `/${req.params.name[1]} Page not found`,

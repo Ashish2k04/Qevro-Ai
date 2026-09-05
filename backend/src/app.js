@@ -13,6 +13,9 @@ app.get('/', (req,res)=>{
     })
 })
 
+/*
+@des: Route for all the incoming requests on authRouter
+*/
 app.use('/api', authRouter);
 
 /*

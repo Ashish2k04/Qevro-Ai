@@ -122,7 +122,7 @@ async function loginCtrl(req,res,next){
             })
         }
 
-        const token = jwt.sign({id: isUserExists._id, username: isUserExists.username}, process.env.JWT_SECRET, {expiresIn: "7d"});
+        const token = jwt.sign({id: isUserExists._id}, process.env.JWT_SECRET, {expiresIn: "7d"});
 
         res.cookie("token", token);
 
@@ -232,5 +232,39 @@ async function callingAiController(req,res,next) {
    }
 };
 
+async function resetPasswordController(req,res,next){
 
-export {registerCtrl, verifyEmail, loginCtrl, getMeController, callingAiController};
+    try{
+    const userId = req.user.id;
+
+    const userExists = await userModel.findById(userId);
+
+    if(!userExists){
+        return res.status(404).json({
+            message: "User not exists.",
+            success: false
+        })
+    }
+
+    userExists.password = req.body.password
+
+    await userExists.save();
+
+    return res.status(200).json({
+        message: "Password changed!",
+        info:{
+            username: userExists.username,
+            email: userExists.email
+        }
+    })
+    }
+    catch(err){
+        err.status = 500;
+        next(err);
+    }
+
+}
+
+
+export {registerCtrl, verifyEmail, loginCtrl, 
+        getMeController, callingAiController, resetPasswordController};

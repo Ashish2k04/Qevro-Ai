@@ -4,6 +4,10 @@ import { Eye, EyeOff } from 'lucide-react'
 
 const Register = () => {
 
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -51,6 +55,8 @@ const Register = () => {
                 bg-white text-sm text-gray-900 outline-none transition-all
                 placeholder:text-gray-400
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                value={name}
+                onChange={(val)=>{setName(val.target.value)}}
               />
             </div>
 
@@ -71,6 +77,8 @@ const Register = () => {
                 bg-white text-sm text-gray-900 outline-none transition-all
                 placeholder:text-gray-400
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                value={email}
+                onChange={(val)=>{setEmail(val.target.value)}}
               />
             </div>
 
@@ -93,6 +101,8 @@ const Register = () => {
                   bg-white text-sm text-gray-900 outline-none transition-all
                   placeholder:text-gray-400
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  value={password}
+                  onChange={(val)=>{setPassword(val.target.value)}}
                 />
 
                 <button

@@ -4,8 +4,8 @@ import { Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
 
-    const [email, setEmail] = useState('as');
-    const [password, setPassword] = useState('ss');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
 
@@ -55,6 +55,7 @@ const Login = () => {
                 placeholder:text-gray-400
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 value={email}
+                onChange={(val)=>{setEmail(val.target.value)}}
               />
             </div>
 
@@ -92,6 +93,7 @@ const Login = () => {
                   placeholder:text-gray-400
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   value={password}
+                  onChange={(val)=>{setPassword(val.target.value)}}
                 />
 
                 <button

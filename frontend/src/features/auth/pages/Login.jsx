@@ -1,3 +1,4 @@
+import {Link} from 'react-router'
 
 const Login = () => {
   return (
@@ -112,7 +113,7 @@ const Login = () => {
               hover:text-indigo-600
               transition-all duration-200 cursor-pointer"
             >
-              Create an account
+              <Link to={'/register'}>Create an account</Link>
             </a>
 
           </div>

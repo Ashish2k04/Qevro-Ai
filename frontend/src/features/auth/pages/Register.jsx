@@ -1,6 +1,11 @@
-import {Link} from 'react-router'
+import { Link } from 'react-router'
+import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 
 const Register = () => {
+
+  const [showPassword, setShowPassword] = useState(false)
+
   return (
     <div className="min-h-screen bg-[#f7f7f5] flex">
 
@@ -78,15 +83,33 @@ const Register = () => {
                 Password
               </label>
 
-              <input
-                id="password"
-                type="password"
-                placeholder="Create a password"
-                className="w-full h-12 px-4 rounded-lg border border-gray-300
-                bg-white text-sm text-gray-900 outline-none transition-all
-                placeholder:text-gray-400
-                focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              />
+              <div className="relative">
+
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  className="w-full h-12 px-4 pr-12 rounded-lg border border-gray-300
+                  bg-white text-sm text-gray-900 outline-none transition-all
+                  placeholder:text-gray-400
+                  focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2
+                  text-gray-400 hover:text-gray-600
+                  cursor-pointer transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff size={19} />
+                  ) : (
+                    <Eye size={19} />
+                  )}
+                </button>
+
+              </div>
             </div>
 
             {/* Register Button */}
@@ -119,7 +142,7 @@ const Register = () => {
               hover:text-indigo-600
               transition-all duration-200 cursor-pointer"
             >
-            <Link to={'/login'}>Log in</Link>
+              <Link to={'/login'}>Log in</Link>
             </a>
 
           </div>

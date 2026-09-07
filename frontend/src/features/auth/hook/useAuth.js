@@ -47,4 +47,9 @@ export function useAuth(){
         }
     }
     
+    return( 
+        handleRegister,
+        handleLogin,
+        handleGetMe
+    )
 }

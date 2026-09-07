@@ -1,4 +1,4 @@
-import { appRoutes } from './app/app.routes.jsx'
+import { appRoutes } from './app.routes.jsx'
 import { RouterProvider } from 'react-router'
 
 const App = () => {

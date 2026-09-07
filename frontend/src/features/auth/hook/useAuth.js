@@ -39,6 +39,12 @@ export function useAuth(){
             const data = await getMe();
             dispatch(setUser(data.info));
         }
+        catch(error){
+            dispatch(setError(error.response?.data?.message || "Failed to fetch user info."))
+        }
+        finally{
+            dispatch(setLoading(false));
+        }
     }
     
 }

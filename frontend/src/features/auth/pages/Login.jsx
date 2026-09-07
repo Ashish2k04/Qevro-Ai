@@ -14,17 +14,16 @@ const Login = () => {
 
     const submitForm = async (event) => {
       event.preventDefault();
-
+      
       const payload = {
         email,
         password
       }
 
-      await handleLogin(payload)
-      .then(()=>{
-           navigation('/');
-      })
-    }
+      const res = await handleLogin(payload)
+      console.log(res)
+      navigation('/');
+}
 
 
   return (

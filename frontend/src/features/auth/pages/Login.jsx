@@ -8,6 +8,17 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
+    const submitForm = (event) => {
+      event.preventDefault();
+
+      const payload = {
+        email,
+        password
+      }
+
+      console.log('Login paylod:', payload)
+    }
+
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] flex select-none">
@@ -52,7 +63,7 @@ const Login = () => {
           </div>
 
           {/* Login Form */}
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={submitForm}>
 
             {/* Email */}
             <div>

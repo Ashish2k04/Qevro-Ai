@@ -206,7 +206,10 @@ async function getMeController(req,res,next) {
     return res.status(200).json({
         message: "User fetched.",
         success: true,
-        user
+        info: {
+            username: user.username,
+            email: user.email
+        }
     })
 }
   catch(err){

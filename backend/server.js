@@ -1,12 +1,18 @@
-import app from './src/app.js';
 import 'dotenv/config';
+import {createServer} from 'http';
+import app from './src/app.js';
 import connectDB from './src/config/database.js';
+import { intializeSocket } from './src/sockets/server.socket.js';
 
 const PORT = process.env.PORT || 8000
 
+const httpServer = createServer(app);
+
+intializeSocket(httpServer);
+
 connectDB()
 .then(()=>{
-    app.listen(PORT, ()=>{
+    httpServer.listen(PORT, ()=>{
     console.log(`Server is running on port ${PORT}`)
 })
 })

@@ -13,11 +13,7 @@ export const appRoutes = createBrowserRouter([
         path: '/register'
     },
     {
-        element: <h1>Home</h1>,
+        element:  <Dashboard />,
         path: '/'
     },
-    {
-        element: <Dashboard />,
-        path: '/dashboard'
-    }
 ])

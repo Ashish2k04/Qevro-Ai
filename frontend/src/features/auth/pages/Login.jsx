@@ -1,7 +1,8 @@
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate, Navigate } from 'react-router'
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hook/useAuth';
+import {useSelector} from 'react-redux';
 
 const Login = () => {
 
@@ -9,6 +10,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const navigation = useNavigate();
+    const {user, loading} = useSelector(state => state.auth);
 
     const {handleLogin} = useAuth();
 
@@ -23,8 +25,11 @@ const Login = () => {
       const res = await handleLogin(payload)
       console.log(res)
       navigation('/');
-}
+    }
 
+   if(!loading && user){
+    return <Navigate to={'/'}/>
+   }
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] flex select-none">

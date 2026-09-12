@@ -1,5 +1,6 @@
 import express from 'express';
 import authRouter from './routes/auth.route.js';
+import chatRouter from './routes/chat.route.js';
 import handleErrors from './middlewares/error.middleware.js';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
@@ -25,6 +26,11 @@ app.get('/', (req,res)=>{
 @des: Route for all the incoming requests on authRouter
 */
 app.use('/api', authRouter);
+
+/*
+@des: Route for user to chat with AI 
+*/
+app.use('/api', chatRouter);
 
 /*
 @des: This route belongs to the unknown requests

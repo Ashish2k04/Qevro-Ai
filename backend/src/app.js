@@ -1,6 +1,6 @@
 import express from 'express';
 import authRouter from './routes/auth.route.js';
-import chatRouter from './routes/chat.route.js';
+import chatRouter from './routes/chats.route.js';
 import handleErrors from './middlewares/error.middleware.js';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';

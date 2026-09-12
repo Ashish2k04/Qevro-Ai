@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import { tokenVerification } from '../middlewares/auth.middleware.js';
-import {sendMessagesController} from '../controllers/chat.controller.js'
+import {sendMessagesController} from '../controllers/chats.controller.js'
 
 const chatRouter = Router();
 

@@ -2,28 +2,37 @@ import 'dotenv/config'
 import {ChatGoogleGenerativeAI} from '@langchain/google-genai';
 import { ChatGroq } from "@langchain/groq";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
-import {} from '@'
+import {createAgent, modelFallbackMiddleware} from 'langchain';
+import {TavilySearch} from '@langchain/tavily';
 
 
-const model_1 = new ChatGoogleGenerativeAI({
+const gemini = new ChatGoogleGenerativeAI({
     model: "gemini-3.5-flash-lite",
     temperature: 0,
     maxRetries: 0
 });
 
-const model_2 = new ChatGroq({
+const groq = new ChatGroq({
     model:  "openai/gpt-oss-120b",
     temperature: 0,
     maxRetries: 0
 });
 
-const model = model_1.withFallbacks({
-    fallbacks:[model_2]
+const webSearchTool = new TavilySearch({
+     maxResults: 5,
+     topic: "general",
+})
+
+const agent = createAgent({
+    model: gemini,
+    tools: [webSearchTool],
+    middleware: [modelFallbackMiddleware(groq)]
 })
 
 export async function askAi(PROMPT) {
     try {
-        const response = await model.invoke([
+        const response = await agent.invoke({
+        messages: [
         new SystemMessage(`
         You are Qevro-Ai, an AI assistant created by Ashish Tiwari.
 
@@ -35,8 +44,8 @@ export async function askAi(PROMPT) {
     `),
 
     new HumanMessage(PROMPT)
-    ]);
-    return response.text
+    ]});
+    return response.messages.at(-1).text
 
     } catch (err) {
         console.error("Something went wrong in AI models:", err);

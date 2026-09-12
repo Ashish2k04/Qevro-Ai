@@ -1,0 +1,24 @@
+info:
+  name: Register
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/register
+  body:
+    type: json
+    data: |-
+      {
+        "username": "test",
+        "email": "test@test.com",
+        "password": "test_test"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -2,7 +2,6 @@ import 'dotenv/config';
 import userModel from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../services/mail.service.js';
-import { askAi } from '../services/ai.service.js';
 import messageModel from '../models/message.model.js';
 
 /*

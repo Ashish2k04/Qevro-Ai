@@ -1,5 +1,6 @@
+import { askAi } from '../services/ai.service.js';
 
-export async function sendMessages(req,res,next) {
+export async function sendMessagesController(req,res,next) {
     try{
     const {question} = req.body;
     const ai_answer = await askAi(question);

@@ -1,0 +1,22 @@
+info:
+  name: message-ai
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/message
+  body:
+    type: json
+    data: |-
+      {
+      "message": "Hello! I want to know the latest ongoing news in India today."
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

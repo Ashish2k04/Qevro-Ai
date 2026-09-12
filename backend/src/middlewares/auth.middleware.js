@@ -6,9 +6,9 @@ export async function tokenVerification(req,res,next) {
 
     if(!token){
         return res.status(404).json({
-            message: "Unauthorized.",
+            message: "Please make sure to log in or register first to use this feature.",
             success: false,
-            error: "No token provided."
+            error: "Unauthorized user."
         })
     }
 

@@ -74,5 +74,26 @@ export async function askAi(PROMPT) {
     }
 }
 
+export async function generateChatTitle(PROMPT){
+    const response = await groq.invoke([
+        new SystemMessage(`
+            You are a chat title generator.
+
+            Generate a short, meaningful title based on the user's first message.
+
+            Rules:
+            - Keep it 2–5 words.
+            - Clearly describe the main topic.
+            - Match the user's language (English, Hindi, or Hinglish).
+            - Do not answer the message.
+            - Do not add explanations, quotes, emojis, or punctuation.
+            - Return ONLY the title.
+        `),
+        new HumanMessage(PROMPT)
+    ])
+
+    return response.text
+}
+
 
 

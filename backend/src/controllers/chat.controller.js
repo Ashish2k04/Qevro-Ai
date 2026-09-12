@@ -2,11 +2,11 @@ import { askAi } from '../services/ai.service.js';
 
 export async function sendMessagesController(req,res,next) {
     try{
-    const {question} = req.body;
+    const {message} = req.body;
     const ai_answer = await askAi(question);
 
     return res.status(201).json({
-        message: "Your answer created successfully.",
+        message: "Reply of your message is created successfully.",
         success: true,
         answer: ai_answer
     });

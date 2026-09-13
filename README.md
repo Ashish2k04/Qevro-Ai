@@ -6,11 +6,13 @@ An AI-powered search engine built with the MERN stack.
 
 ## 🚀 Current Progress
 
-Qevro-Ai is currently being developed with a MERN-based architecture along with AI, real-time communication, authentication, and search capabilities.
+Qevro-Ai is currently under active development.
+
+So far, I have implemented the basic authentication flow, AI chat functionality, API testing setup, and the initial frontend pages.
 
 ### 🔐 Backend APIs Implemented
 
-So far, I have implemented **5 backend APIs**:
+Currently, **5 backend APIs** have been implemented:
 
 - Register
 - Login
@@ -25,16 +27,17 @@ The frontend currently includes:
 - Login page
 - Register page
 
+The frontend follows a **feature-based folder structure** to keep the application organized and scalable.
+
 ### 📦 Frontend Packages & Tools
 
-The frontend is built using:
+The frontend currently uses:
 
 - `@reduxjs/toolkit` — State management
 - `react-redux` — Connecting Redux with React
 - `react-router` — Client-side routing
-- `axios` — API requests
+- `axios` — Making API requests
 - `socket.io-client` — Real-time communication
-- Feature-based folder structure for organizing application features
 
 ### ⚙️ Backend Packages & Tools
 
@@ -43,30 +46,37 @@ The backend currently uses:
 - `express` — Backend framework
 - `mongoose` — MongoDB object modeling
 - `dotenv` — Environment variable management
-- `nodemailer` — Email sending
+- `nodemailer` — Sending emails
 - `socket.io` — Real-time communication
-- `langchain` — AI application framework
+- `langchain` — Building AI applications
 - `@langchain/google-genai` — Google Gemini integration
 - `@langchain/groq` — Groq LLM integration
-- `cookie-parser` — Cookie handling
+- `@langchain/tavily` — Web search integration for AI
+- `cookie-parser` — Handling cookies
 - `morgan` — HTTP request logging
 - `cors` — Cross-Origin Resource Sharing
 - `bcryptjs` — Password hashing
 - `express-validator` — Request validation
-- `@langchain/tavily` — Web search integration for AI
-- `jsonwebtoken` — Authentication using JWT
+- `jsonwebtoken` — JWT-based authentication
 
 ### 🧪 API Testing
 
 I use **Bruno** for testing and managing the backend APIs.
 
-The repository contains a dedicated `bruno` folder with the API testing collection.
-
-### 🗂️ Project Structure
+The Bruno collection is organized feature-wise:
 
 ```text
-Qevro-Ai/
-├── frontend/
-├── backend/
-├── bruno/
-└── README.md
+bruno/
+└── Qevro-AI-APIs/
+    ├── auth/
+    │   ├── Register.yml
+    │   ├── Login.yml
+    │   ├── Get-me.yml
+    │   └── folder.yml
+    │
+    ├── chat/
+    │   ├── Message-ai.yml
+    │   └── folder.yml
+    │
+    ├── .gitignore
+    └── opencollection.yml

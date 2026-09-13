@@ -4,22 +4,25 @@ import messageModel from '../models/message.model.js';
 
 export async function sendMessagesController(req,res,next) {
     try{
-    const {message} = req.body;
+    const {message, chatId} = req.body;
     const {id} = req.user;
 
-    const [ai_reply, ai_Title] = await Promise.all([
-        askAi(message),
-        generateChatTitle(message)
-    ]);
+    const aiReply = await askAi(message);
 
-    const chatTitles = await chatModel.create({
-        user: id, 
-        title: ai_Title
-    });
+    const chatTitles = null;
+    const aiTitle = null;
+
+    if(!chatId){
+       aiTitle = await generateChatTitle(message);
+       chatTitles = await chatModel.create({
+           user: id, 
+           title: aiTitle
+       });  
+    }
 
     const aiMessage = await messageModel.create({
         chat: chatTitles._id,
-        content: ai_reply,
+        content: aiReply,
         role: "ai"
     })
 
@@ -32,8 +35,8 @@ export async function sendMessagesController(req,res,next) {
     return res.status(201).json({
         message: "Reply of your message is created successfully.",
         success: true,
-        title: ai_Title,
-        answer: ai_reply,
+        title: aiTitle,
+        answer: aiReply,
         chatTitles,
         aiMessage,
         userMessage

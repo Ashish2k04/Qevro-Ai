@@ -1,18 +1,17 @@
 info:
-  name: Register
+  name: Login
   type: http
-  seq: 1
+  seq: 2
 
 http:
   method: POST
-  url: http://localhost:3000/api/register
+  url: http://localhost:3000/api/login
   body:
     type: json
     data: |-
       {
-        "username": "test",
-        "email": "test@test.com",
-        "password": "test_test"
+        "email": "{{email}}",
+        "password": "{{password}}"
       }
   auth: inherit
 

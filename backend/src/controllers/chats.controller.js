@@ -12,15 +12,21 @@ export async function sendMessagesController(req,res,next) {
         generateChatTitle(message)
     ]);
 
-    const chat = await chatModel.create({
+    const chatTitles = await chatModel.create({
         user: id, 
         title: ai_Title
     });
 
-    const response = await messageModel.create({
-        chat: chat._id,
+    const aiMessage = await messageModel.create({
+        chat: chatTitles._id,
         content: ai_reply,
         role: "ai"
+    })
+
+    const userMessage = await messageModel.create({
+        chat: chatTitles._id,
+        content: message,
+        role: "user"
     })
 
     return res.status(201).json({
@@ -28,8 +34,9 @@ export async function sendMessagesController(req,res,next) {
         success: true,
         title: ai_Title,
         answer: ai_reply,
-        chat,
-        response
+        chatTitles,
+        aiMessage,
+        userMessage
     });
    }
    catch(err){

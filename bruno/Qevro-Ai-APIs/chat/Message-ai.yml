@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-      "message": "Hello! I want to know the latest ongoing news in India today."
+      "message": "Hello! What is RAG in AI?"
       }
   auth: inherit
 

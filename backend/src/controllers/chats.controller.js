@@ -3,8 +3,11 @@ import { askAi, generateChatTitle } from '../services/ai.service.js';
 export async function sendMessagesController(req,res,next) {
     try{
     const {message} = req.body;
-    const ai_reply = await askAi(message);
-    const ai_Title = await generateChatTitle(message);
+
+    const [ai_reply, ai_Title] = await Promise.all([
+        askAi(message),
+        generateChatTitle(message)
+    ])
 
     return res.status(201).json({
         message: "Reply of your message is created successfully.",

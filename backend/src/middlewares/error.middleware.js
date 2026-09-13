@@ -9,7 +9,7 @@ async function handleErrors(err, req, res, next) {
        response.stack = err.stack
     }
 
-    return res.status(err.status).json(response);
+    return res.status(err.status || 500).json(response);
 }
 
 export default handleErrors;

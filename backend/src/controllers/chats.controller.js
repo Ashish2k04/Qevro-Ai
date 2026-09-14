@@ -7,14 +7,13 @@ export async function sendMessagesController(req,res,next) {
         const {message, chatId} = req.body;
         const {id} = req.user;
 
-        let aiReply = null //Ai answer bana 1
+        let aiReply = null 
 
         let chatTitle = null;
         let aiTitle = null;
         let aiMessage = null;
         let userMessage = null;
 
-    //agar req.body me chatId nahi aata hai tabhi new banake save krna h
     if(!chatId){ 
           aiReply = await askAi([
             {
@@ -28,14 +27,12 @@ export async function sendMessagesController(req,res,next) {
               title: aiTitle
           });  
 
-          //Ai answer chat me save hua
           aiMessage = await messageModel.create({
            chat: chatTitle._id,
            content: aiReply,
            role: "ai"
        })
 
-       //User ka message chat me save hua
           userMessage = await messageModel.create({
               chat: chatTitle._id,
               content: message,

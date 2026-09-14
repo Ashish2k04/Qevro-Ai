@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-         "message": "Hello!"
+         "message": "Current education minister of india is?"
       }
   auth: inherit
 

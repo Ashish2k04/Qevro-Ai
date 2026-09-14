@@ -7,7 +7,7 @@ export async function sendMessagesController(req,res,next) {
         const {message, chatId} = req.body;
         const {id} = req.user;
 
-        const aiReply = await askAi(message); //Ai answer bana 1
+        let aiReply = null //Ai answer bana 1
 
         let chatTitle = null;
         let aiTitle = null;
@@ -16,6 +16,7 @@ export async function sendMessagesController(req,res,next) {
 
     //agar req.body me chatId nahi aata hai tabhi new banake save krna h
     if(!chatId){ 
+          aiReply = await askAi(message);
           aiTitle = await generateChatTitle(message);
           chatTitle = await chatModel.create({
               user: id, 
@@ -45,19 +46,25 @@ export async function sendMessagesController(req,res,next) {
     });
    }
 
-    chatTitle = await chatModel.findById(chatId);
-
-    aiMessage = await messageModel.create({
-      chat: chatId,
-      content: aiReply,
-      role: "ai"
-    })    
+    chatTitle = await chatModel.findById(chatId);   
 
     userMessage = await messageModel.create({
         chat: chatId,
         content: message,
         role: "user"
     })
+
+    const messages = await messageModel.find({chat: chatId});
+
+    aiReply = await askAi(messages);
+
+     aiMessage = await messageModel.create({
+       chat: chatId,
+       content: aiReply,
+       role: "ai"
+    }) 
+
+    console.log(messages)
 
     return res.status(201).json({
         message: "Reply of your message is created successfully.",

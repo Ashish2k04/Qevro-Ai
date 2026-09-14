@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/get-messages
+  url: http://localhost:3000/api/get-messages/6aa7e79d396db3092c1b88e5
   auth: inherit
 
 settings:

@@ -1,7 +1,7 @@
 info:
-  name: Message-ai
+  name: Message-persistence
   type: http
-  seq: 1
+  seq: 2
 
 http:
   method: POST
@@ -10,7 +10,8 @@ http:
     type: json
     data: |-
       {
-         "message": "Hello! What is RAG in AI?"
+        "message": "Hello! Name the CEO of OpenAI?",
+        "chatId": "6aa6be74d0db60bc5bc59455"
       }
   auth: inherit
 

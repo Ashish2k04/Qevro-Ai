@@ -77,3 +77,16 @@ export async function sendMessagesController(req,res,next) {
       next(err)
    }
 };
+
+export async function getChats(req,res,next) {
+     try{
+
+        const {id} = req.user;
+
+        console.log(id)
+
+     }catch(err){
+        err.status = 500;
+        next(err)
+     }
+}

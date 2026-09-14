@@ -1,5 +1,5 @@
 info:
-  name: Message-persistence
+  name: Get-messages
   type: http
   seq: 2
 

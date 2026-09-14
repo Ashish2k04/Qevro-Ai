@@ -5,6 +5,6 @@ import {sendMessagesController, getChats} from '../controllers/chats.controller.
 const chatRouter = Router();
 
 chatRouter.post('/message', tokenVerification, sendMessagesController);
-chatRouter.post('/get-message', tokenVerification, getChats);
+chatRouter.post('/get-chats', tokenVerification, getChats);
 
 export default chatRouter;

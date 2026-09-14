@@ -1,18 +1,14 @@
 info:
-  name: Get-messages
+  name: Get-chats
   type: http
   seq: 2
 
 http:
   method: POST
-  url: http://localhost:3000/api/message
+  url: http://localhost:3000/api/get-message
   body:
     type: json
-    data: |-
-      {
-        "message": "",
-        "chatId": "6aa7e79d396db3092c1b88e5"
-      }
+    data: ""
   auth: inherit
 
 settings:

@@ -8,17 +8,54 @@ An AI-powered search engine built with the MERN stack.
 
 Qevro-Ai is currently under active development.
 
-So far, I have implemented the basic authentication flow, AI chat functionality, API testing setup, and the initial frontend pages.
+So far, I have implemented the authentication flow, AI chat functionality, chat history and message retrieval, API testing setup, and the initial frontend pages.
 
 ### 🔐 Backend APIs Implemented
 
-Currently, **5 backend APIs** have been implemented:
+Currently, **7 backend APIs** have been implemented:
+
+#### Authentication
 
 - Register
 - Login
 - Get Me
 - Verify Email
+
+#### AI Chat
+
 - Chat With AI
+- Get Chats
+- Get Messages
+
+### 💬 Chat & AI Features
+
+The AI chat system currently includes:
+
+- Users can create and continue AI conversations.
+- The AI automatically generates a title for the chat.
+- The AI generates the response to the user's message.
+- The complete chat context is maintained so the AI can remember previous messages within a conversation.
+- Chat history is stored in MongoDB.
+- Users can fetch all of their chats.
+- Users can fetch all messages from a specific chat.
+- Chat-related APIs are protected using user authentication.
+
+#### Get Chats
+
+The `Get Chats` API:
+
+- Decodes the user's ID from the authentication token.
+- Fetches all chats belonging to that user from the `Chats` model.
+- Returns the user's chat history.
+
+#### Get Messages
+
+The `Get Messages` API:
+
+- Requires a `chatId` as a route parameter.
+- Fetches all messages belonging to the specified chat.
+- Returns both AI and user messages.
+- The API is protected and requires authentication.
 
 ### 🎨 Frontend
 
@@ -76,7 +113,11 @@ bruno/
     │
     ├── chat/
     │   ├── Message-ai.yml
+    │   ├── Get-chats.yml
+    │   ├── Get-messages.yml
     │   └── folder.yml
+    │
+    ├── environments/
     │
     ├── .gitignore
     └── opencollection.yml

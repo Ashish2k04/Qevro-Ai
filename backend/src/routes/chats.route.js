@@ -6,6 +6,6 @@ const chatRouter = Router();
 
 chatRouter.post('/message', tokenVerification, sendMessagesController);
 chatRouter.get('/get-chats', tokenVerification, getChats);
-chatRouter.get('/get-messages', tokenVerification, getMessages);
+chatRouter.get('/get-messages/:chatId', tokenVerification, getMessages);
 
 export default chatRouter;

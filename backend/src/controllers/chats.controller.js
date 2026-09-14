@@ -80,10 +80,28 @@ export async function sendMessagesController(req,res,next) {
 
 export async function getChats(req,res,next) {
      try{
-        
+
         const {id} = req.user;
 
         const messages = await chatModel.find({user: id});
+
+        return res.status(200).json({
+            message: "All chats fetched.",
+            messages
+        })
+
+     }catch(err){
+        err.status = 500;
+        next(err)
+     }
+}
+
+export async function getMessages(req,res,next) {
+     try{
+        
+        const {chatId} = req.params;
+
+        const messages = await messageModel.find({chat: chatId});
 
         return res.status(200).json({
             message: "All chats fetched.",

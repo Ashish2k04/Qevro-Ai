@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "message": "Hello! Name the CEO of OpenAI?",
-        "chatId": "6aa6be74d0db60bc5bc59455"
+        "message": "",
+        "chatId": "6aa7e79d396db3092c1b88e5"
       }
   auth: inherit
 

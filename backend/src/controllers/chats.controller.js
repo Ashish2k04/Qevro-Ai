@@ -45,9 +45,7 @@ export async function sendMessagesController(req,res,next) {
     });
    }
 
-    const titleRetrive = await chatModel.findById(chatId);
-
-    chatTitle = titleRetrive.title
+    chatTitle = await chatModel.findById(chatId);
 
     aiMessage = await messageModel.create({
       chat: chatId,

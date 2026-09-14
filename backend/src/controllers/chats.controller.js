@@ -16,7 +16,12 @@ export async function sendMessagesController(req,res,next) {
 
     //agar req.body me chatId nahi aata hai tabhi new banake save krna h
     if(!chatId){ 
-          aiReply = await askAi(message);
+          aiReply = await askAi([
+            {
+                role: "user",
+                content: message
+            }
+          ]);
           aiTitle = await generateChatTitle(message);
           chatTitle = await chatModel.create({
               user: id, 
@@ -44,9 +49,7 @@ export async function sendMessagesController(req,res,next) {
         aiMessage,
         userMessage
     });
-   }
-
-    chatTitle = await chatModel.findById(chatId);   
+   }  
 
     userMessage = await messageModel.create({
         chat: chatId,
@@ -67,8 +70,6 @@ export async function sendMessagesController(req,res,next) {
     console.log(messages)
 
     return res.status(201).json({
-        message: "Reply of your message is created successfully.",
-        success: true,
         chatTitle,
         aiMessage,
         userMessage

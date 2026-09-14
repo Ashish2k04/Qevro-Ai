@@ -4,45 +4,67 @@ import messageModel from '../models/message.model.js';
 
 export async function sendMessagesController(req,res,next) {
     try{
-    const {message, chatId} = req.body;
-    const {id} = req.user;
+        const {message, chatId} = req.body;
+        const {id} = req.user;
 
-    const aiReply = await askAi(message); //Ai answer bana 1
+        const aiReply = await askAi(message); //Ai answer bana 1
 
-    let chatTitles = null;
-    let aiTitle = null;
+        let chatTitle = null;
+        let aiTitle = null;
+        let aiMessage = null;
+        let userMessage = null;
 
     //agar req.body me chatId nahi aata hai tabhi new banake save krna h
     if(!chatId){ 
           aiTitle = await generateChatTitle(message);
-          chatTitles = await chatModel.create({
+          chatTitle = await chatModel.create({
               user: id, 
               title: aiTitle
           });  
 
           //Ai answer chat me save hua
-       const aiMessage = await messageModel.create({
-           chat: chatId,
+          aiMessage = await messageModel.create({
+           chat: chatTitle._id,
            content: aiReply,
            role: "ai"
        })
 
        //User ka message chat me save hua
-       const userMessage = await messageModel.create({
-           chat: chatId,
-           content: message,
-           role: "user"
-       })
+          userMessage = await messageModel.create({
+              chat: chatTitle._id,
+              content: message,
+              role: "user"
+        })
+
+        return res.status(201).json({
+        message: "Reply of your message is created successfully.",
+        success: true,
+        chatTitle,
+        aiMessage,
+        userMessage
+    });
    }
 
-   chatTitles = await chatModel({_id: chatId});
+    const titleRetrive = await chatModel.findById(chatId);
+
+    chatTitle = titleRetrive.title
+
+    aiMessage = await messageModel.create({
+      chat: chatId,
+      content: aiReply,
+      role: "ai"
+    })    
+
+    userMessage = await messageModel.create({
+        chat: chatId,
+        content: message,
+        role: "user"
+    })
 
     return res.status(201).json({
         message: "Reply of your message is created successfully.",
         success: true,
-        title: aiTitle,
-        answer: aiReply,
-        chatTitles,
+        chatTitle,
         aiMessage,
         userMessage
     });

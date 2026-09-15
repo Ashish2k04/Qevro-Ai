@@ -101,6 +101,18 @@ export async function getMessages(req,res,next) {
         
         const {chatId} = req.params;
 
+        const chat = await chatModel.findOne({
+            chat: chatId,
+            user: req.user.id
+        });
+
+        if(!chat){
+            return res.status(404).json({
+                message: "404 chat not found.",
+                success: false
+            })
+        }
+
         const messages = await messageModel.find({chat: chatId});
 
         return res.status(200).json({

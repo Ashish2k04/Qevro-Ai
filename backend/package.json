@@ -27,5 +27,8 @@
     "morgan": "^1.12.0",
     "nodemailer": "^9.0.5",
     "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "jest": "^30.5.1"
   }
 }

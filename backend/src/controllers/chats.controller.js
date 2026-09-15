@@ -102,7 +102,7 @@ export async function getMessages(req,res,next) {
         const {chatId} = req.params;
 
         const chat = await chatModel.findOne({
-            chat: chatId,
+            _id: chatId,
             user: req.user.id
         });
 

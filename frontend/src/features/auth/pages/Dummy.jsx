@@ -9,12 +9,8 @@ import {
   AudioLines,
   LogOut,
 } from 'lucide-react';
-import { useChat } from '../hooks/useChat';
 
 const Dashboard = () => {
-
-    const { user } = useSelector(state => state.auth);
-    const { initializeSocketConnection } = useChat();
 
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [message, setMessage] = useState('');
@@ -28,10 +24,6 @@ const Dashboard = () => {
     ]);
 
     console.log(user)
-
-    useEffect(() => {
-      initializeSocketConnection();
-    }, [])
 
     const deleteChat = (index) => {
       setChats(chats.filter((_, i) => i !== index));
@@ -493,4 +485,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default Dummy

@@ -3,6 +3,7 @@ import Login from '../features/auth/pages/Login.jsx';
 import Register from '../features/auth/pages/Register.jsx';
 import Dashboard from '../features/chat/pages/Dashboard.jsx';
 import Protected from '../features/auth/components/Protected.jsx';
+import Dummy from '../features/auth/pages/Dummy.jsx';
 
 export const appRoutes = createBrowserRouter([
     {
@@ -17,4 +18,8 @@ export const appRoutes = createBrowserRouter([
         element:  <Protected><Dashboard /></Protected>,
         path: '/'
     },
+    {
+        element: <Dummy />,
+        path: '/dummy'
+    }
 ])

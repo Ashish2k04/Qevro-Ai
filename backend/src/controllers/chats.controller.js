@@ -130,7 +130,20 @@ export async function deleteChat(req,res,next){
     try{
         const {chatId} = req.params;
 
-        
+        const chat = await chatModel.findOne({
+            chat: chatId,
+            user: req.user.id
+        });
+
+        if(!chat){
+            return res.status(404).json({
+                message: "Chat not found.",
+                success: false
+            })
+        }
+
+        await chatModel.findByIdAndDelete({chatId});
+        await messageModel.deleteMany({chat: chatId});
     }
     catch(err){
         err.status = 500;

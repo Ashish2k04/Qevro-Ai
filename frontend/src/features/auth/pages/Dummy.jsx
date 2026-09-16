@@ -6,13 +6,22 @@ import {
   PanelRightOpen,
   Trash2,
   Send,
-  AudioLines,
+  BotMessageSquare,
   LogOut,
 } from 'lucide-react';
 
 const Dummy = () => {
 
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    // Desktop -> Open
+    // Mobile -> Closed
+    const [sidebarOpen, setSidebarOpen] = useState(() => {
+      if (typeof window !== 'undefined') {
+        return window.innerWidth >= 1024;
+      }
+
+      return true;
+    });
+
     const [message, setMessage] = useState('');
 
     const [chats, setChats] = useState([
@@ -22,6 +31,7 @@ const Dummy = () => {
       'System design basics',
       'MongoDB aggregation',
     ]);
+
 
     const deleteChat = (index) => {
       setChats(chats.filter((_, i) => i !== index));
@@ -92,8 +102,18 @@ const Dummy = () => {
 
               ${
                 sidebarOpen
-                  ? 'w-[290px] fixed inset-y-0 left-0 z-50 lg:relative lg:w-[290px]'
-                  : 'w-0 fixed inset-y-0 left-0 z-50 border-r-0 bg-transparent lg:relative lg:w-[72px]'
+                  ? `
+                    w-[290px]
+                    fixed inset-y-0 left-0 z-50
+                    lg:relative lg:w-[290px]
+                  `
+                  : `
+                    w-0
+                    fixed inset-y-0 left-0 z-40
+                    border-r-0
+                    bg-transparent
+                    lg:relative lg:w-0
+                  `
               }
             `}
           >
@@ -104,7 +124,7 @@ const Dummy = () => {
                 ${
                   sidebarOpen
                     ? 'opacity-100'
-                    : 'opacity-0 pointer-events-none lg:opacity-0'
+                    : 'opacity-0 pointer-events-none'
                 }
               `}
             >
@@ -269,7 +289,7 @@ const Dummy = () => {
           </aside>
 
 
-          {/* MOBILE SIDEBAR OPEN OVERLAY */}
+          {/* MOBILE SIDEBAR OVERLAY */}
           {sidebarOpen && (
             <div
               onClick={() => setSidebarOpen(false)}
@@ -284,60 +304,74 @@ const Dummy = () => {
           )}
 
 
+          {/* DESKTOP SIDEBAR OPEN BUTTON */}
+          {!sidebarOpen && (
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="
+                hidden
+                lg:flex
+                fixed
+                top-5
+                left-4
+                z-50
+                w-10 h-10
+                rounded-lg
+                border border-gray-700
+                bg-gray-800/90
+                text-gray-300
+                items-center justify-center
+                cursor-pointer
+                hover:bg-gray-700
+                hover:text-white
+                transition-all duration-200
+              "
+            >
+              <PanelLeftOpen size={19} />
+            </button>
+          )}
+
+
           {/* CHAT AREA */}
           <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-black/30">
 
-            {/* CHAT NAVBAR */}
+            {/* MOBILE TOP BAR */}
             <div
               className="
+                lg:hidden
                 relative
                 h-16
                 shrink-0
-                px-4
-                sm:px-6
-                lg:px-8
                 flex items-center
-                border-b border-gray-800/80
-                bg-gray-900/40
-                backdrop-blur-xl
+                px-4
+                bg-[#05070b]
+                border-b border-gray-800/60
               "
             >
 
-              {/* Mobile Sidebar Toggle */}
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                className={`
-                  lg:hidden
-                  w-10 h-10
-                  rounded-lg
-                  border border-gray-700
-                  bg-gray-800/80
-                  text-gray-300
-                  flex items-center justify-center
-                  cursor-pointer
-                  hover:bg-gray-700
-                  hover:text-white
-                  transition-all duration-200
-                  ${sidebarOpen ? 'hidden' : 'flex'}
-                `}
-              >
-                <PanelLeftOpen size={19} />
-              </button>
-
-
-              {/* Desktop New Chat */}
-              <h2
-                className="
-                  hidden
-                  lg:block
-                  text-sm
-                  font-medium
-                  text-gray-300
-                "
-              >
-                New Chat
-              </h2>
+              {!sidebarOpen && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(true)}
+                  className="
+                    relative
+                    z-50
+                    w-10 h-10
+                    rounded-lg
+                    border border-gray-700
+                    bg-[#05070b]
+                    text-gray-300
+                    flex items-center justify-center
+                    cursor-pointer
+                    hover:bg-gray-900
+                    hover:text-white
+                    transition-all duration-200
+                  "
+                >
+                  <PanelLeftOpen size={19} />
+                </button>
+              )}
 
             </div>
 
@@ -533,7 +567,7 @@ const Dummy = () => {
                     "
                   />
 
-                  {/* Send / Audio Button */}
+                  {/* Send / Bot Button */}
                   <button
                     type="submit"
                     className="
@@ -556,7 +590,7 @@ const Dummy = () => {
                     {message.trim() ? (
                       <Send size={18} />
                     ) : (
-                      <AudioLines size={20} strokeWidth={2} />
+                      <BotMessageSquare size={20} strokeWidth={2} />
                     )}
                   </button>
 

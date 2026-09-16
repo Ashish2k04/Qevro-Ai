@@ -2,7 +2,7 @@ import { askAi, generateChatTitle } from '../services/ai.service.js';
 import chatModel from '../models/chat.model.js';
 import messageModel from '../models/message.model.js';
 
-export async function sendMessagesController(req,res,next) {
+export async function sendMessages(req,res,next) {
     try{
         const {message, chatId} = req.body;
         const {id} = req.user;

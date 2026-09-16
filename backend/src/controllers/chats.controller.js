@@ -125,3 +125,15 @@ export async function getMessages(req,res,next) {
         next(err)
      }
 }
+
+export async function deleteChat(req,res,next){
+    try{
+        const {chatId} = req.params;
+
+        
+    }
+    catch(err){
+        err.status = 500;
+        next(err)
+    }
+}

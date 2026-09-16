@@ -2,15 +2,15 @@ import { useSelector } from 'react-redux'
 import { useEffect, useState } from 'react';
 import {
   UserRound,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftOpen,
+  PanelRightOpen,
   Trash2,
   Send,
   AudioLines,
   LogOut,
 } from 'lucide-react';
 
-const Dashboard = () => {
+const Dummy = () => {
 
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [message, setMessage] = useState('');
@@ -22,8 +22,6 @@ const Dashboard = () => {
       'System design basics',
       'MongoDB aggregation',
     ]);
-
-    console.log(user)
 
     const deleteChat = (index) => {
       setChats(chats.filter((_, i) => i !== index));
@@ -88,26 +86,41 @@ const Dashboard = () => {
               bg-gray-900/60
               backdrop-blur-xl
               transition-all duration-300 ease-in-out
-              ${sidebarOpen ? 'w-[290px]' : 'w-[72px]'}
+
+              lg:relative
+              lg:z-auto
+
+              ${
+                sidebarOpen
+                  ? 'w-[290px] fixed inset-y-0 left-0 z-50 lg:relative lg:w-[290px]'
+                  : 'w-0 fixed inset-y-0 left-0 z-50 border-r-0 bg-transparent lg:relative lg:w-[72px]'
+              }
             `}
           >
 
-            <div className="h-full flex flex-col p-4">
+            <div
+              className={`
+                h-full flex flex-col p-4
+                ${
+                  sidebarOpen
+                    ? 'opacity-100'
+                    : 'opacity-0 pointer-events-none lg:opacity-0'
+                }
+              `}
+            >
 
               {/* Sidebar Header */}
               <div className="flex items-center justify-between mb-8">
 
                 {/* Logo */}
                 <h1
-                  className={`
-                    text-2xl font-semibold tracking-tight
-                    text-white transition-all duration-300
+                  className="
+                    text-2xl
+                    font-semibold
+                    tracking-tight
+                    text-white
                     whitespace-nowrap
-                    ${sidebarOpen
-                      ? 'opacity-100'
-                      : 'opacity-0 w-0 overflow-hidden'
-                    }
-                  `}
+                  "
                 >
                   Qevro<span className="text-indigo-400">Ai.</span>
                 </h1>
@@ -115,7 +128,7 @@ const Dashboard = () => {
                 {/* Collapse */}
                 <button
                   type="button"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  onClick={() => setSidebarOpen(false)}
                   className="
                     w-10 h-10 shrink-0
                     rounded-lg
@@ -129,11 +142,7 @@ const Dashboard = () => {
                     transition-all duration-200
                   "
                 >
-                  {sidebarOpen ? (
-                    <ChevronLeft size={19} />
-                  ) : (
-                    <ChevronRight size={19} />
-                  )}
+                  <PanelRightOpen size={19} />
                 </button>
 
               </div>
@@ -141,16 +150,12 @@ const Dashboard = () => {
 
               {/* Chat Titles */}
               <div
-                className={`
-                  flex-1 overflow-y-auto
+                className="
+                  flex-1
+                  overflow-y-auto
                   [scrollbar-width:none]
                   [&::-webkit-scrollbar]:hidden
-                  transition-all duration-300
-                  ${sidebarOpen
-                    ? 'opacity-100'
-                    : 'opacity-0 pointer-events-none'
-                  }
-                `}
+                "
               >
 
                 <div className="space-y-3">
@@ -175,11 +180,13 @@ const Dashboard = () => {
                       "
                     >
 
-                      <span className="
-                        text-sm
-                        text-gray-300
-                        truncate
-                      ">
+                      <span
+                        className="
+                          text-sm
+                          text-gray-300
+                          truncate
+                        "
+                      >
                         {chat}
                       </span>
 
@@ -211,16 +218,11 @@ const Dashboard = () => {
 
               {/* Sidebar Bottom */}
               <div
-                className={`
+                className="
                   pt-4
                   border-t border-gray-800
                   flex items-center justify-between
-                  transition-all duration-300
-                  ${sidebarOpen
-                    ? 'opacity-100'
-                    : 'opacity-0'
-                  }
-                `}
+                "
               >
 
                 {/* Logout */}
@@ -267,15 +269,33 @@ const Dashboard = () => {
           </aside>
 
 
-          {/* CHAT AREA */}
-          <main className="flex-1 min-w-0 flex flex-col bg-black/30">
+          {/* MOBILE SIDEBAR OPEN OVERLAY */}
+          {sidebarOpen && (
+            <div
+              onClick={() => setSidebarOpen(false)}
+              className="
+                fixed
+                inset-0
+                z-40
+                bg-black/40
+                lg:hidden
+              "
+            />
+          )}
 
-            {/* Chat Header */}
+
+          {/* CHAT AREA */}
+          <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-black/30">
+
+            {/* CHAT NAVBAR */}
             <div
               className="
+                relative
                 h-16
                 shrink-0
-                px-8
+                px-4
+                sm:px-6
+                lg:px-8
                 flex items-center
                 border-b border-gray-800/80
                 bg-gray-900/40
@@ -283,7 +303,39 @@ const Dashboard = () => {
               "
             >
 
-              <h2 className="text-sm font-medium text-gray-300">
+              {/* Mobile Sidebar Toggle */}
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(true)}
+                className={`
+                  lg:hidden
+                  w-10 h-10
+                  rounded-lg
+                  border border-gray-700
+                  bg-gray-800/80
+                  text-gray-300
+                  flex items-center justify-center
+                  cursor-pointer
+                  hover:bg-gray-700
+                  hover:text-white
+                  transition-all duration-200
+                  ${sidebarOpen ? 'hidden' : 'flex'}
+                `}
+              >
+                <PanelLeftOpen size={19} />
+              </button>
+
+
+              {/* Desktop New Chat */}
+              <h2
+                className="
+                  hidden
+                  lg:block
+                  text-sm
+                  font-medium
+                  text-gray-300
+                "
+              >
                 New Chat
               </h2>
 
@@ -291,17 +343,39 @@ const Dashboard = () => {
 
 
             {/* Messages Area */}
-            <div className="relative flex-1 overflow-y-auto px-8 py-8 bg-[#05070b]">
+            <div
+              className="
+                relative
+                flex-1
+                min-h-0
+                overflow-y-auto
+                px-4
+                py-6
+                sm:px-6
+                sm:py-8
+                lg:px-8
+                bg-[#05070b]
+              "
+            >
 
-              <div className="relative max-w-5xl mx-auto space-y-3">
+              <div
+                className="
+                  relative
+                  max-w-5xl
+                  mx-auto
+                  space-y-3
+                "
+              >
 
                 {/* User Message */}
                 <div className="flex justify-end">
 
                   <div
                     className="
-                      max-w-[70%]
-                      px-6 py-4
+                      max-w-[88%]
+                      sm:max-w-[75%]
+                      lg:max-w-[70%]
+                      px-5 py-4
                       rounded-2xl
                       border border-indigo-400/30
                       bg-indigo-500
@@ -309,6 +383,7 @@ const Dashboard = () => {
                       text-sm
                       leading-6
                       shadow-lg
+                      break-words
                     "
                   >
                     Can you explain how Redis caching works
@@ -326,18 +401,24 @@ const Dashboard = () => {
                       w-full
                       min-h-[300px]
                       rounded-3xl
-                      border border-gray-800
+                      border-0
+                      lg:border
+                      border-gray-800
                       bg-black/80
                       shadow-2xl
-                      px-8 py-8
+                      px-5 py-6
+                      sm:px-8
+                      sm:py-8
                     "
                   >
 
-                    <p className="
-                      text-gray-300
-                      text-sm
-                      leading-7
-                    ">
+                    <p
+                      className="
+                        text-gray-300
+                        text-sm
+                        leading-7
+                      "
+                    >
                       Redis is an in-memory data store that is commonly
                       used as a cache between your application and database.
                       Instead of querying the database every time, your
@@ -345,12 +426,14 @@ const Dashboard = () => {
                       in Redis.
                     </p>
 
-                    <p className="
-                      mt-4
-                      text-gray-400
-                      text-sm
-                      leading-7
-                    ">
+                    <p
+                      className="
+                        mt-4
+                        text-gray-400
+                        text-sm
+                        leading-7
+                      "
+                    >
                       This is useful when the same data is requested often
                       because reading from memory is usually much faster
                       than making another database query.
@@ -366,8 +449,10 @@ const Dashboard = () => {
 
                   <div
                     className="
-                      max-w-[70%]
-                      px-6 py-4
+                      max-w-[88%]
+                      sm:max-w-[75%]
+                      lg:max-w-[70%]
+                      px-5 py-4
                       rounded-2xl
                       border border-indigo-400/30
                       bg-indigo-500
@@ -375,6 +460,7 @@ const Dashboard = () => {
                       text-sm
                       leading-6
                       shadow-lg
+                      break-words
                     "
                   >
                     So basically Redis reduces the number of
@@ -392,9 +478,14 @@ const Dashboard = () => {
             <div
               className="
                 shrink-0
-                px-8
-                pb-7
-                pt-4
+                px-4
+                pb-4
+                pt-3
+                sm:px-6
+                sm:pb-5
+                lg:px-8
+                lg:pb-7
+                lg:pt-4
                 bg-black/40
                 border-t border-gray-800/60
               "

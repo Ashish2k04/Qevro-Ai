@@ -83,9 +83,9 @@ export async function getChats(req,res,next) {
 
         const {id} = req.user;
 
-        const messages = await chatModel.find({user: id});
+        const chats = await chatModel.find({user: id});
 
-        if(messages.length === 0){
+        if(chats.length === 0){
             return res.status(404).json({
                 message: "You've have no chats yet.",
                 success: false
@@ -94,7 +94,7 @@ export async function getChats(req,res,next) {
 
         return res.status(200).json({
             message: "All chats fetched.",
-            messages
+            chats
         })
 
      }catch(err){

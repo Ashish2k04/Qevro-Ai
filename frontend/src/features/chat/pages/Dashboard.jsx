@@ -5,7 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
-  Send,
+  ArrowUp,
   LogOut,
 } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
@@ -150,9 +150,9 @@ const Dashboard = () => {
               <div
                 className={`
                   flex-1 overflow-y-auto
-                  transition-all duration-300
                   [scrollbar-width:none]
                   [&::-webkit-scrollbar]:hidden
+                  transition-all duration-300
                   ${sidebarOpen
                     ? 'opacity-100'
                     : 'opacity-0 pointer-events-none'
@@ -198,7 +198,7 @@ const Dashboard = () => {
                           shrink-0
                           ml-3
                           text-gray-400/70
-                          hover:text-red-400
+                          hover:text-gray-300
                           cursor-pointer
                           transition-all duration-200
                           hover:scale-110
@@ -409,7 +409,7 @@ const Dashboard = () => {
 
               <form
                 onSubmit={handleSend}
-                className="max-w-5xl mx-auto"
+                className="max-w-4xl mx-auto"
               >
 
                 <div
@@ -417,20 +417,15 @@ const Dashboard = () => {
                     relative
                     min-h-[64px]
                     rounded-2xl
-                    border border-gray-600
                     bg-gray-900
                     shadow-lg
-                    focus-within:border-indigo-500
-                    focus-within:ring-1
-                    focus-within:ring-indigo-500/30
-                    transition-all duration-200
                   "
                 >
 
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Ask Qevro-AI anything..."
+                    placeholder="Ask anything"
                     rows={1}
                     className="
                       w-full
@@ -439,9 +434,10 @@ const Dashboard = () => {
                       overflow-hidden
                       bg-transparent
                       outline-none
+                      border-none
                       text-sm
                       text-gray-200
-                      placeholder:text-gray-500
+                      placeholder:text-gray-300
                       px-5
                       py-5
                       pr-16
@@ -468,7 +464,7 @@ const Dashboard = () => {
                       active:scale-95
                     "
                   >
-                    <Send size={18} />
+                    <ArrowUp size={20} strokeWidth={2.5} />
                   </button>
 
                 </div>

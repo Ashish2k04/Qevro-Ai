@@ -131,7 +131,7 @@ export async function deleteChat(req,res,next){
         const {chatId} = req.params;
 
         const chat = await chatModel.findOne({
-            chat: chatId,
+            _id: chatId,
             user: req.user.id
         });
 
@@ -142,7 +142,7 @@ export async function deleteChat(req,res,next){
             })
         }
 
-        await chatModel.findByIdAndDelete({chatId});
+        await chatModel.findByIdAndDelete(chatId);
         await messageModel.deleteMany({chat: chatId});
 
         return res.status(200).json({

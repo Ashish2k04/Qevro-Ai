@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-         "message": "Current education minister of india is?"
+         "message": "Top 5 programming languages to learn in 2026 that will be in demand in the future."
       }
   auth: inherit
 

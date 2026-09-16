@@ -144,6 +144,11 @@ export async function deleteChat(req,res,next){
 
         await chatModel.findByIdAndDelete({chatId});
         await messageModel.deleteMany({chat: chatId});
+
+        return res.status(200).json({
+            message: "Chat Deleted Successfully.",
+            success: true
+        })
     }
     catch(err){
         err.status = 500;

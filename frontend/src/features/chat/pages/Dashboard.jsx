@@ -197,7 +197,7 @@ const Dashboard = () => {
                         className="
                           shrink-0
                           ml-3
-                          text-red-500/70
+                          text-gray-400/70
                           hover:text-red-400
                           cursor-pointer
                           transition-all duration-200

@@ -11,7 +11,17 @@ export const useChat = () => {
         dispatch(setLoading(true));
         try{
            const data = await sendMessages({message, chatId})
-           
+           const {chatTitle, aiMessage} = data;
+           dispatch(setChats((prev) => {
+            return{ 
+            ...prev,
+             [chatTitle._id]: {
+              ...chatTitle,
+              messages: [{content: message, role: "user"}, aiMessage]
+             }
+            }
+           }))
+           dispatch(setcurrentChatId(chatTitle._id));
         }
         catch(error){
             dispatch(setError(error.response?.data?.message || "Something went wrong while sending message"))

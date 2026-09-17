@@ -44,7 +44,6 @@ export async function sendMessages(req,res,next) {
         success: true,
         chatTitle,
         aiMessage,
-        userMessage
     });
    }  
 
@@ -69,7 +68,6 @@ export async function sendMessages(req,res,next) {
     return res.status(201).json({
         chatTitle,
         aiMessage,
-        userMessage
     });
    }
    catch(err){

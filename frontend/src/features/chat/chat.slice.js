@@ -1,17 +1,20 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, current} from '@reduxjs/toolkit';
 import { setError, setLoading } from '../auth/auth.slice';
-import { act } from 'react';
 
 const chatSlice = createSlice({
       name: "chat",
       initialState: {
-        chat: null,
+        chats: {},
+        currentChatId: null,
         loading: null,
         error: null,
       },
       reducers: {
-        setChat: (state, action) => {
-            state.chat == action.payload
+        setChats: (state, action) => {
+            state.chats == action.payload
+        },
+        setcurrentChatId: (state, action) => {
+            state.currentChatId == action.payload
         },
         setLoading: (state, action) => {
             state.loading == action.payload
@@ -22,6 +25,5 @@ const chatSlice = createSlice({
       }
 })
 
-export const {setChat, setLoading, setError} = chatSlice.actions;
+export const {setChats, setcurrentChatId, setLoading, setError} = chatSlice.actions;
 export default chatSlice.reducer;
-

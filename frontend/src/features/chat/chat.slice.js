@@ -1,5 +1,4 @@
-import {createSlice, current} from '@reduxjs/toolkit';
-import { setError, setLoading } from '../auth/auth.slice';
+import {createSlice} from '@reduxjs/toolkit';
 
 const chatSlice = createSlice({
       name: "chat",

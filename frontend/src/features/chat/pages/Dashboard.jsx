@@ -9,12 +9,13 @@ import {
   BotMessageSquare,
   LogOut,
 } from 'lucide-react';
-import { useChat } from '../hooks/useChat';
+import { useChat } from '../hooks/useChat.js';
 
 const Dashboard = () => {
 
-    const { user } = useSelector(state => state.auth);
-    const { initializeSocketConnection } = useChat();
+    const chat = useChat();
+    const chats = useSelector((state) => state.chat.chats);
+    const currentChatId = useSelector((state) => state.chat.currentChatId)
 
     // Desktop -> Open
     // Mobile -> Closed
@@ -28,18 +29,18 @@ const Dashboard = () => {
 
     const [message, setMessage] = useState('');
 
-    const [chats, setChats] = useState([
-      'Building a REST API',
-      'Explain Redis caching',
-      'React authentication',
-      'System design basics',
-      'MongoDB aggregation',
-    ]);
+    // const [chats, setChats] = useState([
+    //   'Building a REST API',
+    //   'Explain Redis caching',
+    //   'React authentication',
+    //   'System design basics',
+    //   'MongoDB aggregation',
+    // ]);
 
-    console.log(user)
+    // console.log(user)
 
     useEffect(() => {
-      initializeSocketConnection();
+      chat.initializeSocketConnection();
     }, [])
 
     const deleteChat = (index) => {
@@ -49,9 +50,10 @@ const Dashboard = () => {
     const handleSend = (e) => {
       e.preventDefault();
 
-      if (!message.trim()) return;
+      const trimmedMessage = message.trim();
+      if (!trimmedMessage) return;
 
-      setMessage('');
+      chat.handleSendMessages({message: trimmedMessage, chatId: currentChatId});
     }
 
   return (
@@ -189,10 +191,10 @@ const Dashboard = () => {
 
                 <div className="space-y-3">
 
-                  {chats.map((chat, index) => (
+                  {chats[currentChatId]?.messages.map((message) => (
 
                     <div
-                      key={index}
+                      key={message.id}
                       className="
                         group
                         w-full

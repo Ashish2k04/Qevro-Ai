@@ -32,5 +32,5 @@ export const useChat = () => {
     }
 
 
-    return{initializeSocketConnection}
+    return{initializeSocketConnection, handleSendMessages}
 }   

@@ -7,6 +7,20 @@ export const useChat = () => {
 
     const dispatch = useDispatch();
 
+    async function handleSendMessages({message, chatId}){
+        dispatch(setLoading(true));
+        try{
+           const data = await sendMessages({message, chatId})
+           
+        }
+        catch(error){
+            dispatch(setError(error.response?.data?.message || "Something went wrong while sending message"))
+        }
+        finally{
+            dispatch(setLoading(false));
+        }
+    }
+
 
     return{initializeSocketConnection}
-}
+}   

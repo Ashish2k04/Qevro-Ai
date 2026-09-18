@@ -9,8 +9,13 @@ import {
   BotMessageSquare,
   LogOut,
 } from 'lucide-react';
+import { useChat } from '../../chat/hooks/useChat.js';
 
 const Dummy = () => {
+
+    const chat = useChat();
+    const chats = useSelector((state) => state.chat.chats);
+    const currentChatId = useSelector((state) => state.chat.currentChatId)
 
     // Desktop -> Open
     // Mobile -> Closed
@@ -24,23 +29,51 @@ const Dummy = () => {
 
     const [message, setMessage] = useState('');
 
-    const [chats, setChats] = useState([
-      'Building a REST API',
-      'Explain Redis caching',
-      'React authentication',
-      'System design basics',
-      'MongoDB aggregation',
-    ]);
+    const messages = [
+      {
+        id: 1,
+        role: 'user',
+        content:
+          'Can you explain how Redis caching works and when I should use it in my backend?'
+      },
+      {
+        id: 2,
+        role: 'ai',
+        content:
+          'Redis is an in-memory data store that is commonly used as a cache between your application and database. Instead of querying the database every time, your server can temporarily store frequently requested data in Redis.',
+      },
+      {
+        id: 3,
+        role: 'user',
+        content:
+          'So basically Redis reduces the number of database queries?'
+      }
+    ];
 
+    // const [chats, setChats] = useState('');
+
+    // console.log(user)
+
+    useEffect(() => {
+      chat.initializeSocketConnection();
+    }, [])
 
     const deleteChat = (index) => {
       setChats(chats.filter((_, i) => i !== index));
     }
 
-    const handleSend = (e) => {
+    const handleSend = async (e) => {
       e.preventDefault();
 
-      if (!message.trim()) return;
+      const trimmedMessage = message.trim();
+      if (!trimmedMessage) return;
+
+      let res = await chat.handleSendMessages({
+        message: trimmedMessage,
+        chatId: currentChatId
+      });
+
+      console.log(res)
 
       setMessage('');
     }
@@ -52,6 +85,7 @@ const Dummy = () => {
       <div className="relative h-full w-full overflow-hidden bg-gray-950">
 
         {/* Background Aura */}
+
         <div
           className="
             absolute -top-52 -left-52
@@ -180,10 +214,10 @@ const Dummy = () => {
 
                 <div className="space-y-3">
 
-                  {chats.map((chat, index) => (
+                  {chats[currentChatId]?.messages.map((message) => (
 
                     <div
-                      key={index}
+                      key={message.id}
                       className="
                         group
                         w-full
@@ -401,107 +435,81 @@ const Dummy = () => {
                 "
               >
 
-                {/* User Message */}
-                <div className="flex justify-end">
+                {/* =================================================
+                    MESSAGES
+                ================================================= */}
+
+                {messages.map((item) => (
 
                   <div
-                    className="
-                      max-w-[88%]
-                      sm:max-w-[75%]
-                      lg:max-w-[70%]
-                      px-5 py-4
-                      rounded-2xl
-                      border border-indigo-400/30
-                      bg-indigo-500
-                      text-white
-                      text-sm
-                      leading-6
-                      shadow-lg
-                      break-words
-                    "
-                  >
-                    Can you explain how Redis caching works
-                    and when I should use it in my backend?
-                  </div>
-
-                </div>
-
-
-                {/* AI Response */}
-                <div className="flex justify-start">
-
-                  <div
-                    className="
-                      w-full
-                      min-h-[300px]
-                      rounded-3xl
-                      border-0
-                      lg:border
-                      border-gray-800
-                      bg-black/80
-                      shadow-2xl
-                      px-5 py-6
-                      sm:px-8
-                      sm:py-8
-                    "
+                    key={item.id}
+                    className={
+                      item.role === 'user'
+                        ? 'flex justify-end'
+                        : 'flex justify-start'
+                    }
                   >
 
-                    <p
-                      className="
-                        text-gray-300
-                        text-sm
-                        leading-7
-                      "
-                    >
-                      Redis is an in-memory data store that is commonly
-                      used as a cache between your application and database.
-                      Instead of querying the database every time, your
-                      server can temporarily store frequently requested data
-                      in Redis.
-                    </p>
+                    {item.role === 'user' ? (
 
-                    <p
-                      className="
-                        mt-4
-                        text-gray-400
-                        text-sm
-                        leading-7
-                      "
-                    >
-                      This is useful when the same data is requested often
-                      because reading from memory is usually much faster
-                      than making another database query.
-                    </p>
+                      /* USER MESSAGE */
+
+                      <div
+                        className="
+                          max-w-[88%]
+                          sm:max-w-[75%]
+                          lg:max-w-[70%]
+                          px-5 py-4
+                          rounded-2xl
+                          border border-indigo-400/30
+                          bg-indigo-500
+                          text-white
+                          text-sm
+                          leading-6
+                          shadow-lg
+                          break-words
+                        "
+                      >
+                        {item.content}
+                      </div>
+
+                    ) : (
+
+                      /* AI RESPONSE */
+
+                      <div
+                        className="
+                          w-full
+                          min-h-[300px]
+                          rounded-3xl
+                          border-0
+                          lg:border
+                          border-gray-800
+                          bg-black/80
+                          shadow-2xl
+                          px-5 py-6
+                          sm:px-8
+                          sm:py-8
+                        "
+                      >
+
+                        <p
+                          className="
+                            text-gray-300
+                            text-sm
+                            leading-7
+                          "
+                        >
+                          {item.content}
+                        </p>
+
+                      </div>
+
+                    )}
 
                   </div>
 
-                </div>
-
-
-                {/* Second User Message */}
-                <div className="flex justify-end">
-
-                  <div
-                    className="
-                      max-w-[88%]
-                      sm:max-w-[75%]
-                      lg:max-w-[70%]
-                      px-5 py-4
-                      rounded-2xl
-                      border border-indigo-400/30
-                      bg-indigo-500
-                      text-white
-                      text-sm
-                      leading-6
-                      shadow-lg
-                      break-words
-                    "
-                  >
-                    So basically Redis reduces the number of
-                    database queries?
-                  </div>
-
-                </div>
+                ))}
 
               </div>
 
@@ -587,11 +595,16 @@ const Dummy = () => {
                       active:scale-95
                     "
                   >
+
                     {message.trim() ? (
                       <Send size={18} />
                     ) : (
-                      <BotMessageSquare size={20} strokeWidth={2} />
+                      <BotMessageSquare
+                        size={20}
+                        strokeWidth={2}
+                      />
                     )}
+
                   </button>
 
                 </div>

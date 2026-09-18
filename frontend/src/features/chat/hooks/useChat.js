@@ -21,7 +21,7 @@ export const useChat = () => {
              }
             }
            }))
-           dispatch(setcurrentChatId(chatTitle._id));
+           dispatch(setcurrentChatId(chat._id));
         }
         catch(error){
             dispatch(setError(error.response?.data?.message || "Something went wrong while sending message"))

@@ -27,7 +27,7 @@ const Dummy = () => {
       return true;
     });
 
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState([]);
 
     const messages = [
       {
@@ -50,7 +50,7 @@ const Dummy = () => {
       }
     ];
 
-    // const [chats, setChats] = useState('');
+     const [chatTitle, setChatTitle] = useState(null);
 
     // console.log(user)
 
@@ -68,12 +68,10 @@ const Dummy = () => {
       const trimmedMessage = message.trim();
       if (!trimmedMessage) return;
 
-      let res = await chat.handleSendMessages({
+      chat.handleSendMessages({
         message: trimmedMessage,
         chatId: currentChatId
       });
-
-      console.log(res)
 
       setMessage('');
     }

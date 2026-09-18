@@ -15,13 +15,16 @@ export async function sendMessages(req,res,next) {
         let userMessage = null;
 
     if(!chatId){ 
+
           aiReply = await askAi([
             {
                 role: "user",
                 content: message
             }
           ]);
+
           aiGeneratedTitle = await generateChatTitle(message);
+
           createdChat = await chatModel.create({
               user: id, 
               title: aiGeneratedTitle
@@ -53,9 +56,9 @@ export async function sendMessages(req,res,next) {
         role: "user"
     })
 
-    const messages = await messageModel.find({chat: chatId});
+    const messages = await messageModel.find({chat: chatId}); //it returns array of objects with ai and user messages
 
-    aiReply = await askAi(messages);
+    aiReply = await askAi(messages); //array of objects passed into ai.service.js to generate new response while remembering every messages
 
      aiMessage = await messageModel.create({
        chat: chatId,
@@ -66,7 +69,7 @@ export async function sendMessages(req,res,next) {
     console.log(messages)
 
     return res.status(201).json({
-        savingTitleInsideChatCollection: createdChat,
+        chat: createdChat,
         aiMessage,
     });
    }

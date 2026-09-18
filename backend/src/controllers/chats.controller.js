@@ -9,7 +9,7 @@ export async function sendMessages(req,res,next) {
 
         let aiReply = null 
 
-        let titleGenration = null;
+        let titleGenerate = null;
         let chatTitle = null;
         let aiMessage = null;
         let userMessage = null;
@@ -21,10 +21,10 @@ export async function sendMessages(req,res,next) {
                 content: message
             }
           ]);
-          titleGenration = await generateChatTitle(message);
+          titleGenerate = await generateChatTitle(message);
           chatTitle = await chatModel.create({
               user: id, 
-              title: titleGenration
+              title: titleGenerate
           });  
 
           aiMessage = await messageModel.create({

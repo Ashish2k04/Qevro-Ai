@@ -11,12 +11,12 @@ export const useChat = () => {
         dispatch(setLoading(true));
         try{
            const data = await sendMessages({message, chatId})
-           const {chatTitle, aiMessage} = data;
+           const {chat, aiMessage} = data;
            dispatch(setChats((prev) => {
             return{ 
             ...prev,
-             [chatTitle._id]: {
-              ...chatTitle,
+             [chat._id]: {
+              ...chat,
               messages: [{content: message, role: "user"}, aiMessage]
              }
             }

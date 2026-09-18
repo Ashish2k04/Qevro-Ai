@@ -56,17 +56,15 @@ export async function sendMessages(req,res,next) {
         role: "user"
     })
 
-    const messages = await messageModel.find({chat: chatId}); //it returns array of objects with ai and user messages
+    const messages = await messageModel.find({chat: chatId}); 
 
-    aiReply = await askAi(messages); //array of objects passed into ai.service.js to generate new response while remembering every messages
+    aiReply = await askAi(messages);
 
      aiMessage = await messageModel.create({
        chat: chatId,
        content: aiReply,
        role: "ai"
     }) 
-
-    console.log(messages)
 
     return res.status(201).json({
         chat: createdChat,

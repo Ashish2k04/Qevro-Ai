@@ -43,9 +43,9 @@ export async function sendMessages(req,res,next) {
         })
 
         return res.status(201).json({
-        message: "Reply of your message is created successfully.",
+        message: "Message created.",
         success: true,
-        chatTitle: createdChat,
+        chat: createdChat,
         aiMessage,
     });
    }  
@@ -67,6 +67,8 @@ export async function sendMessages(req,res,next) {
     }) 
 
     return res.status(201).json({
+        message: "Message created.",
+        success: true,
         chat: createdChat,
         aiMessage,
     });

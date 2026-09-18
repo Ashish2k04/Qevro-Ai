@@ -9,8 +9,8 @@ export async function sendMessages(req,res,next) {
 
         let aiReply = null 
 
-        let titleGenerate = null;
-        let chatTitle = null;
+        let titleGeneratedByAi = null;
+        let savingTitleInsideChatCollection = null;
         let aiMessage = null;
         let userMessage = null;
 
@@ -22,19 +22,19 @@ export async function sendMessages(req,res,next) {
             }
           ]);
           titleGenerate = await generateChatTitle(message);
-          chatTitle = await chatModel.create({
+          savingTitleInsideChatCollection = await chatModel.create({
               user: id, 
-              title: titleGenerate
+              title: titleGeneratedByAi
           });  
 
           aiMessage = await messageModel.create({
-           chat: chatTitle._id,
+           chat: savingTitleInsideChatCollection._id,
            content: aiReply,
            role: "ai"
        })
 
           userMessage = await messageModel.create({
-              chat: chatTitle._id,
+              chat: savingTitleInsideChatCollection._id,
               content: message,
               role: "user"
         })
@@ -42,7 +42,7 @@ export async function sendMessages(req,res,next) {
         return res.status(201).json({
         message: "Reply of your message is created successfully.",
         success: true,
-        chatTitle,
+        savingTitleInsideChatCollection,
         aiMessage,
     });
    }  
@@ -66,7 +66,7 @@ export async function sendMessages(req,res,next) {
     console.log(messages)
 
     return res.status(201).json({
-        chatTitle,
+        savingTitleInsideChatCollection,
         aiMessage,
     });
    }

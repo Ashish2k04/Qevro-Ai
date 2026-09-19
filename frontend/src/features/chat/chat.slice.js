@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const chatSlice = createSlice({
-
     name: "chat",
 
     initialState: {
@@ -12,9 +11,7 @@ const chatSlice = createSlice({
     },
 
     reducers: {
-
         createNewChat: (state, action) => {
-
             const { chatId, title } = action.payload;
 
             state.chats[chatId] = {
@@ -25,52 +22,36 @@ const chatSlice = createSlice({
             };
         },
 
-
         addNewMessage: (state, action) => {
-
             const { chatId, content, role } = action.payload;
 
-            // Safety check
-            if (!state.chats[chatId]) {
-                return;
-            }
+            if (!state.chats[chatId]) return;
 
             state.chats[chatId].messages.push({
                 content,
                 role
             });
 
-            state.chats[chatId].lastUpdated =
-                new Date().toISOString();
+            state.chats[chatId].lastUpdated = new Date().toISOString();
         },
 
-
         setChats: (state, action) => {
-
             state.chats = action.payload;
         },
 
-
         setcurrentChatId: (state, action) => {
-
             state.currentChatId = action.payload;
         },
 
-
         setLoading: (state, action) => {
-
             state.loading = action.payload;
         },
 
-
         setError: (state, action) => {
-
             state.error = action.payload;
         },
 
-
         deleteChatFromStore: (state, action) => {
-
             const chatId = action.payload;
 
             delete state.chats[chatId];
@@ -80,15 +61,11 @@ const chatSlice = createSlice({
             }
         },
 
-
         clearError: (state) => {
-
             state.error = null;
         }
-
     }
 });
-
 
 export const {
     setChats,
@@ -100,6 +77,5 @@ export const {
     deleteChatFromStore,
     clearError
 } = chatSlice.actions;
-
 
 export default chatSlice.reducer;

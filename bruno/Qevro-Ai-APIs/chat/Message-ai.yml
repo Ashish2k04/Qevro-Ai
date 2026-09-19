@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-         "message": "Top 5 programming languages to learn in 2026 that will be in demand in the future, just take there names."
+         "message": "How many states are in india?"
       }
   auth: inherit
 

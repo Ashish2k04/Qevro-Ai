@@ -1,5 +1,6 @@
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
+
 import {
   UserRound,
   PanelLeftOpen,
@@ -9,72 +10,482 @@ import {
   BotMessageSquare,
   LogOut,
 } from 'lucide-react';
+
 import { useChat } from '../../chat/hooks/useChat.js';
+
+import {
+  setChats,
+  setcurrentChatId,
+  setError,
+  deleteChatFromStore,
+} from '../../chat/chat.slice.js';
+
+import {
+  getChats,
+  getMessages,
+  deletChat,
+} from '../../chat/services/chat.api.js';
+
 
 const Dummy = () => {
 
-    const chat = useChat();
-    const chats = useSelector((state) => state.chat.chats);
-    const currentChatId = useSelector((state) => state.chat.currentChatId)
+  const dispatch = useDispatch();
 
-    // Desktop -> Open
-    // Mobile -> Closed
-    const [sidebarOpen, setSidebarOpen] = useState(() => {
-      if (typeof window !== 'undefined') {
-        return window.innerWidth >= 1024;
-      }
+  const chat = useChat();
 
-      return true;
-    });
 
-    const [message, setMessage] = useState([]);
+  /*
+  |--------------------------------------------------------------------------
+  | REDUX STATE
+  |--------------------------------------------------------------------------
+  */
 
-    const messages = [
-      {
-        id: 1,
-        role: 'user',
-        content:
-          'Can you explain how Redis caching works and when I should use it in my backend?'
-      },
-      {
-        id: 2,
-        role: 'ai',
-        content:
-          'Redis is an in-memory data store that is commonly used as a cache between your application and database. Instead of querying the database every time, your server can temporarily store frequently requested data in Redis.',
-      },
-      {
-        id: 3,
-        role: 'user',
-        content:
-          'So basically Redis reduces the number of database queries?'
-      }
-    ];
+  const chats = useSelector(
+    (state) => state.chat.chats
+  );
 
-     const [chatTitle, setChatTitle] = useState(null);
+  const currentChatId = useSelector(
+    (state) => state.chat.currentChatId
+  );
 
-    // console.log(user)
+  const loading = useSelector(
+    (state) => state.chat.loading
+  );
 
-    useEffect(() => {
-      chat.initializeSocketConnection();
-    }, [])
 
-    const deleteChat = (index) => {
-      setChats(chats.filter((_, i) => i !== index));
+  /*
+  |--------------------------------------------------------------------------
+  | LOCAL STATE
+  |--------------------------------------------------------------------------
+  */
+
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
     }
 
-    const handleSend = async (e) => {
+    return true;
+  });
+
+
+  const [message, setMessage] = useState('');
+
+  const [messages, setMessages] = useState([]);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | SOCKET CONNECTION
+  |--------------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+
+    chat.initializeSocketConnection();
+
+  }, []);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | GET ALL CHATS
+  |--------------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+
+    const fetchChats = async () => {
+
+      try {
+
+        const data = await getChats();
+
+        const fetchedChats = data?.chats || [];
+
+        const chatsObject = {};
+
+        fetchedChats.forEach((chatItem) => {
+
+          chatsObject[chatItem._id] = {
+
+            id: chatItem._id,
+
+            title: chatItem.title,
+
+            messages: [],
+
+            lastUpdated:
+              chatItem.updatedAt ||
+              chatItem.createdAt ||
+              new Date().toISOString()
+
+          };
+
+        });
+
+
+        dispatch(setChats(chatsObject));
+
+      }
+      catch (error) {
+
+        if (error.response?.status === 404) {
+
+          dispatch(setChats({}));
+
+          return;
+
+        }
+
+
+        dispatch(
+          setError(
+            error.response?.data?.message ||
+            "Something went wrong while fetching chats"
+          )
+        );
+
+      }
+
+    };
+
+
+    fetchChats();
+
+  }, [dispatch]);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | SELECT CHAT
+  |--------------------------------------------------------------------------
+  */
+
+  const handleSelectChat = async (chatId) => {
+
+    try {
+
+      dispatch(
+        setcurrentChatId(chatId)
+      );
+
+
+      const data = await getMessages(chatId);
+
+      const fetchedMessages =
+        data?.messages || [];
+
+
+      const formattedMessages =
+        fetchedMessages.map((item) => ({
+          id: item._id,
+          content: item.content,
+          role: item.role
+        }));
+
+
+      setMessages(formattedMessages);
+
+    }
+    catch (error) {
+
+      dispatch(
+        setError(
+          error.response?.data?.message ||
+          "Something went wrong while loading messages"
+        )
+      );
+
+    }
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | NEW CHAT
+  |--------------------------------------------------------------------------
+  */
+
+  const handleNewChat = () => {
+
+    dispatch(
+      setcurrentChatId(null)
+    );
+
+
+    setMessages([]);
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | SEND MESSAGE
+  |--------------------------------------------------------------------------
+  */
+
+  const handleSend = async (e) => {
+
+    e.preventDefault();
+
+
+    const trimmedMessage =
+      message.trim();
+
+
+    if (!trimmedMessage) {
+      return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SAVE CURRENT CHAT ID
+    |--------------------------------------------------------------------------
+    */
+
+    const chatIdAtStart =
+      currentChatId;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW USER MESSAGE IMMEDIATELY
+    |--------------------------------------------------------------------------
+    */
+
+    const temporaryUserMessage = {
+
+      id: Date.now(),
+
+      role: 'user',
+
+      content: trimmedMessage
+
+    };
+
+
+    setMessages((prev) => [
+
+      ...prev,
+
+      temporaryUserMessage
+
+    ]);
+
+
+    setMessage('');
+
+
+    try {
+
+      /*
+      |--------------------------------------------------------------------------
+      | SEND API REQUEST
+      |--------------------------------------------------------------------------
+      */
+
+      const data =
+        await chat.handleSendMessages({
+
+          message: trimmedMessage,
+
+          chatId: chatIdAtStart
+
+        });
+
+
+      console.log(
+        'API RESPONSE:',
+        data
+      );
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | NEW CHAT
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        !chatIdAtStart &&
+        data?.chat
+      ) {
+
+        const newChatId =
+          data.chat._id;
+
+
+        dispatch(
+          setcurrentChatId(newChatId)
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AI RESPONSE
+        |--------------------------------------------------------------------------
+        */
+
+        if (data?.aiMessage) {
+
+          setMessages((prev) => [
+
+            ...prev,
+
+            {
+
+              id:
+                data.aiMessage._id ||
+                Date.now() + 1,
+
+              role:
+                data.aiMessage.role ||
+                'ai',
+
+              content:
+                data.aiMessage.content ||
+                ''
+
+            }
+
+          ]);
+
+        }
+
+      }
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | EXISTING CHAT
+      |--------------------------------------------------------------------------
+      */
+
+      else if (chatIdAtStart) {
+
+        if (data?.aiMessage) {
+
+          setMessages((prev) => [
+
+            ...prev,
+
+            {
+
+              id:
+                data.aiMessage._id ||
+                Date.now() + 1,
+
+              role:
+                data.aiMessage.role ||
+                'ai',
+
+              content:
+                data.aiMessage.content ||
+                ''
+
+            }
+
+          ]);
+
+        }
+
+      }
+
+    }
+    catch (error) {
+
+      console.error(
+        'Error while sending message:',
+        error
+      );
+
+    }
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | DELETE CHAT
+  |--------------------------------------------------------------------------
+  */
+
+  const handleDeleteChat = async (
+    e,
+    chatId
+  ) => {
+
+    e.stopPropagation();
+
+
+    try {
+
+      await deletChat(chatId);
+
+
+      dispatch(
+        deleteChatFromStore(chatId)
+      );
+
+
+      if (
+        currentChatId === chatId
+      ) {
+
+        setMessages([]);
+
+      }
+
+    }
+    catch (error) {
+
+      dispatch(
+        setError(
+          error.response?.data?.message ||
+          "Something went wrong while deleting chat"
+        )
+      );
+
+    }
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | ENTER KEY SEND
+  |--------------------------------------------------------------------------
+  */
+
+  const handleKeyDown = (e) => {
+
+    if (
+      e.key === 'Enter' &&
+      !e.shiftKey
+    ) {
+
       e.preventDefault();
 
-      const trimmedMessage = message.trim();
-      if (!trimmedMessage) return;
+      handleSend(e);
 
-      chat.handleSendMessages({
-        message: trimmedMessage,
-        chatId: currentChatId
-      });
-
-      setMessage('');
     }
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | EMPTY CHAT CHECK
+  |--------------------------------------------------------------------------
+  */
+
+  const isEmptyChat =
+    !currentChatId &&
+    messages.length === 0;
+
 
   return (
     <div className="h-screen w-full bg-[#090d17] overflow-hidden select-none">
@@ -117,10 +528,14 @@ const Dummy = () => {
           "
         />
 
+
         {/* Main Layout */}
+
         <div className="relative flex h-full">
 
+
           {/* SIDEBAR */}
+
           <aside
             className={`
               shrink-0 h-full
@@ -153,6 +568,7 @@ const Dummy = () => {
             <div
               className={`
                 h-full flex flex-col p-4
+
                 ${
                   sidebarOpen
                     ? 'opacity-100'
@@ -161,10 +577,13 @@ const Dummy = () => {
               `}
             >
 
+
               {/* Sidebar Header */}
+
               <div className="flex items-center justify-between mb-8">
 
                 {/* Logo */}
+
                 <h1
                   className="
                     text-2xl
@@ -177,10 +596,14 @@ const Dummy = () => {
                   Qevro<span className="text-indigo-400">Ai.</span>
                 </h1>
 
+
                 {/* Collapse */}
+
                 <button
                   type="button"
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={() =>
+                    setSidebarOpen(false)
+                  }
                   className="
                     w-10 h-10 shrink-0
                     rounded-lg
@@ -200,7 +623,34 @@ const Dummy = () => {
               </div>
 
 
+              {/* NEW CHAT */}
+
+              <button
+                type="button"
+                onClick={handleNewChat}
+                className="
+                  w-full
+                  h-12
+                  mb-4
+                  px-4
+                  rounded-xl
+                  border border-gray-700/80
+                  bg-gray-800/50
+                  text-gray-300
+                  flex items-center justify-center
+                  cursor-pointer
+                  hover:bg-gray-800
+                  hover:border-gray-600
+                  hover:text-white
+                  transition-all duration-200
+                "
+              >
+                + New Chat
+              </button>
+
+
               {/* Chat Titles */}
+
               <div
                 className="
                   flex-1
@@ -212,56 +662,70 @@ const Dummy = () => {
 
                 <div className="space-y-3">
 
-                  {chats[currentChatId]?.messages.map((message) => (
+                  {Object.values(chats).map(
+                    (chatItem) => (
 
-                    <div
-                      key={message.id}
-                      className="
-                        group
-                        w-full
-                        h-12
-                        px-4
-                        rounded-xl
-                        border border-gray-700/80
-                        bg-gray-800/50
-                        flex items-center justify-between
-                        cursor-pointer
-                        hover:bg-gray-800
-                        hover:border-gray-600
-                        transition-all duration-200
-                      "
-                    >
-
-                      <span
+                      <div
+                        key={chatItem.id}
+                        onClick={() =>
+                          handleSelectChat(
+                            chatItem.id
+                          )
+                        }
                         className="
-                          text-sm
-                          text-gray-300
-                          truncate
-                        "
-                      >
-                        {chat}
-                      </span>
-
-                      {/* Delete */}
-                      <button
-                        type="button"
-                        onClick={() => deleteChat(index)}
-                        className="
-                          shrink-0
-                          ml-3
-                          text-gray-400/70
-                          hover:text-gray-300
+                          group
+                          w-full
+                          h-12
+                          px-4
+                          rounded-xl
+                          border border-gray-700/80
+                          bg-gray-800/50
+                          flex items-center justify-between
                           cursor-pointer
+                          hover:bg-gray-800
+                          hover:border-gray-600
                           transition-all duration-200
-                          hover:scale-110
                         "
                       >
-                        <Trash2 size={16} />
-                      </button>
 
-                    </div>
+                        <span
+                          className="
+                            text-sm
+                            text-gray-300
+                            truncate
+                          "
+                        >
+                          {chatItem.title}
+                        </span>
 
-                  ))}
+
+                        {/* Delete */}
+
+                        <button
+                          type="button"
+                          onClick={(e) =>
+                            handleDeleteChat(
+                              e,
+                              chatItem.id
+                            )
+                          }
+                          className="
+                            shrink-0
+                            ml-3
+                            text-gray-400/70
+                            hover:text-gray-300
+                            cursor-pointer
+                            transition-all duration-200
+                            hover:scale-110
+                          "
+                        >
+                          <Trash2 size={16} />
+                        </button>
+
+                      </div>
+
+                    )
+                  )}
 
                 </div>
 
@@ -269,6 +733,7 @@ const Dummy = () => {
 
 
               {/* Sidebar Bottom */}
+
               <div
                 className="
                   pt-4
@@ -278,6 +743,7 @@ const Dummy = () => {
               >
 
                 {/* Logout */}
+
                 <button
                   type="button"
                   className="
@@ -297,6 +763,7 @@ const Dummy = () => {
 
 
                 {/* User Icon */}
+
                 <button
                   type="button"
                   className="
@@ -322,9 +789,12 @@ const Dummy = () => {
 
 
           {/* MOBILE SIDEBAR OVERLAY */}
+
           {sidebarOpen && (
             <div
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
               className="
                 fixed
                 inset-0
@@ -337,10 +807,13 @@ const Dummy = () => {
 
 
           {/* DESKTOP SIDEBAR OPEN BUTTON */}
+
           {!sidebarOpen && (
             <button
               type="button"
-              onClick={() => setSidebarOpen(true)}
+              onClick={() =>
+                setSidebarOpen(true)
+              }
               className="
                 hidden
                 lg:flex
@@ -366,9 +839,12 @@ const Dummy = () => {
 
 
           {/* CHAT AREA */}
+
           <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-black/30">
 
+
             {/* MOBILE TOP BAR */}
+
             <div
               className="
                 lg:hidden
@@ -385,7 +861,9 @@ const Dummy = () => {
               {!sidebarOpen && (
                 <button
                   type="button"
-                  onClick={() => setSidebarOpen(true)}
+                  onClick={() =>
+                    setSidebarOpen(true)
+                  }
                   className="
                     relative
                     z-50
@@ -408,13 +886,16 @@ const Dummy = () => {
             </div>
 
 
-            {/* Messages Area */}
+            {/* MESSAGES AREA */}
+
             <div
               className="
                 relative
                 flex-1
                 min-h-0
                 overflow-y-auto
+                [scrollbar-width:none]
+                [&::-webkit-scrollbar]:hidden
                 px-4
                 py-6
                 sm:px-6
@@ -424,61 +905,153 @@ const Dummy = () => {
               "
             >
 
-              <div
-                className="
-                  relative
-                  max-w-5xl
-                  mx-auto
-                  space-y-3
-                "
-              >
+              {/* EMPTY NEW CHAT */}
 
-                {/* =================================================
-                    MESSAGES
-                ================================================= */}
+              {isEmptyChat ? (
 
-                {messages.map((item) => (
+                <div
+                  className="
+                    h-full
+                    flex
+                    flex-col
+                    items-center
+                    justify-center
+                    text-center
+                  "
+                >
 
-                  <div
-                    key={item.id}
-                    className={
-                      item.role === 'user'
-                        ? 'flex justify-end'
-                        : 'flex justify-start'
-                    }
+                  <BotMessageSquare
+                    size={42}
+                    strokeWidth={1.8}
+                    className="
+                      text-indigo-400
+                      mb-5
+                    "
+                  />
+
+                  <h2
+                    className="
+                      text-2xl
+                      sm:text-3xl
+                      font-semibold
+                      text-gray-200
+                      tracking-tight
+                    "
                   >
+                    Welcome to Qevro-Ai
+                  </h2>
 
-                    {item.role === 'user' ? (
+                  <p
+                    className="
+                      mt-2
+                      text-sm
+                      text-gray-500
+                    "
+                  >
+                    Ask anything and start a new conversation.
+                  </p>
 
-                      /* USER MESSAGE */
+                </div>
 
-                      <div
-                        className="
-                          max-w-[88%]
-                          sm:max-w-[75%]
-                          lg:max-w-[70%]
-                          px-5 py-4
-                          rounded-2xl
-                          border border-indigo-400/30
-                          bg-indigo-500
-                          text-white
-                          text-sm
-                          leading-6
-                          shadow-lg
-                          break-words
-                        "
-                      >
-                        {item.content}
-                      </div>
+              ) : (
 
-                    ) : (
+                <div
+                  className="
+                    relative
+                    max-w-5xl
+                    mx-auto
+                    space-y-1
+                  "
+                >
 
-                      /* AI RESPONSE */
+                  {/* MESSAGES */}
+
+                  {messages.map((item) => (
+
+                    <div
+                      key={item.id}
+                      className={
+                        item.role === 'user'
+                          ? 'flex justify-end'
+                          : 'flex justify-start'
+                      }
+                    >
+
+                      {item.role === 'user' ? (
+
+                        /* USER MESSAGE */
+
+                        <div
+                          className="
+                            max-w-[88%]
+                            sm:max-w-[75%]
+                            lg:max-w-[70%]
+                            px-5 py-4
+                            rounded-2xl
+                            border border-indigo-400/30
+                            bg-indigo-500
+                            text-white
+                            text-sm
+                            leading-6
+                            shadow-lg
+                            break-words
+                          "
+                        >
+                          {item.content}
+                        </div>
+
+                      ) : (
+
+                        /* AI RESPONSE */
+
+                        <div
+                          className="
+                            w-full
+                            rounded-3xl
+                            border-0
+                            lg:border
+                            border-gray-800
+                            bg-black/80
+                            shadow-2xl
+                            px-5 py-6
+                            sm:px-8
+                            sm:py-8
+                          "
+                        >
+
+                          <p
+                            className="
+                              text-gray-300
+                              text-sm
+                              leading-7
+                            "
+                          >
+                            {item.content}
+                          </p>
+
+                        </div>
+
+                      )}
+
+                    </div>
+
+                  ))}
+
+
+                  {/* AI THINKING PLACEHOLDER */}
+
+                  {loading && (
+
+                    <div
+                      className="
+                        flex
+                        justify-start
+                      "
+                    >
 
                       <div
                         className="
                           w-full
-                          min-h-[300px]
                           rounded-3xl
                           border-0
                           lg:border
@@ -491,30 +1064,73 @@ const Dummy = () => {
                         "
                       >
 
-                        <p
+                        <div
                           className="
-                            text-gray-300
-                            text-sm
-                            leading-7
+                            flex
+                            items-center
+                            gap-3
+                            text-gray-400
                           "
                         >
-                          {item.content}
-                        </p>
+
+                          <BotMessageSquare
+                            size={19}
+                            className="text-indigo-400"
+                          />
+
+                          <span className="text-sm">
+                            Qevro-Ai is thinking...
+                          </span>
+
+                          <span
+                            className="
+                              flex
+                              gap-1
+                              ml-1
+                            "
+                          >
+
+                            <span className="animate-bounce">
+                              .
+                            </span>
+
+                            <span
+                              className="
+                                animate-bounce
+                                [animation-delay:150ms]
+                              "
+                            >
+                              .
+                            </span>
+
+                            <span
+                              className="
+                                animate-bounce
+                                [animation-delay:300ms]
+                              "
+                            >
+                              .
+                            </span>
+
+                          </span>
+
+                        </div>
 
                       </div>
 
-                    )}
+                    </div>
 
-                  </div>
+                  )}
 
-                ))}
+                </div>
 
-              </div>
+              )}
 
             </div>
 
 
             {/* INPUT */}
+
             <div
               className="
                 shrink-0
@@ -553,7 +1169,10 @@ const Dummy = () => {
 
                   <textarea
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) =>
+                      setMessage(e.target.value)
+                    }
+                    onKeyDown={handleKeyDown}
                     placeholder="Ask anything"
                     rows={1}
                     className="
@@ -573,9 +1192,12 @@ const Dummy = () => {
                     "
                   />
 
-                  {/* Send / Bot Button */}
+
+                  {/* SEND / BOT BUTTON */}
+
                   <button
                     type="submit"
+                    disabled={loading}
                     className="
                       absolute
                       right-3
@@ -595,12 +1217,16 @@ const Dummy = () => {
                   >
 
                     {message.trim() ? (
+
                       <Send size={18} />
+
                     ) : (
+
                       <BotMessageSquare
                         size={20}
                         strokeWidth={2}
                       />
+
                     )}
 
                   </button>
@@ -618,7 +1244,8 @@ const Dummy = () => {
       </div>
 
     </div>
-  )
-}
+  );
+};
 
-export default Dummy
+
+export default Dummy;

@@ -47,6 +47,7 @@ export async function sendMessages(req,res,next) {
         success: true,
         chat: createdChat,
         aiMessage,
+        message
     });
    }  
 
@@ -71,6 +72,7 @@ export async function sendMessages(req,res,next) {
         success: true,
         chat: createdChat,
         aiMessage,
+        message
     });
    }
    catch(err){

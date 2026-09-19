@@ -255,6 +255,7 @@ The frontend currently uses:
 - `react-router` — Client-side routing
 - `axios` — Making API requests
 - `socket.io-client` — Real-time communication
+- `tailwindcss` — Utility-first CSS framework for styling
 
 ---
 

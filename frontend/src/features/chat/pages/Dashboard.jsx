@@ -1,1459 +1,787 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect, useState, useRef } from 'react';
+import {
+    useEffect,
+    useState,
+    useRef
+} from 'react';
+
+import { useChat } from '../hooks/useChat.js';
 
 import {
-  UserRound,
-  PanelLeftOpen,
-  PanelRightOpen,
-  Trash2,
-  Send,
-  BotMessageSquare,
-  LogOut,
+    setChats,
+    setcurrentChatId,
+    setError,
+    deleteChatFromStore
+} from '../chat.slice.js';
+
+import {
+    getChats,
+    getMessages,
+    deletChat
+} from '../services/chat.api.js';
+
+import ChatSidebar from '../components/ChatSidebar.jsx';
+import ChatMessages from '../components/ChatMessages.jsx';
+import ChatInput from '../components/ChatInput.jsx';
+import DeleteChatModal from '../components/DeleteChatModal.jsx';
+
+import {
+    PanelLeftOpen
 } from 'lucide-react';
-
-import { useChat } from '../../chat/hooks/useChat.js';
-
-import {
-  setChats,
-  setcurrentChatId,
-  setError,
-  deleteChatFromStore,
-} from '../../chat/chat.slice.js';
-
-import {
-  getChats,
-  getMessages,
-  deletChat,
-} from '../../chat/services/chat.api.js';
 
 
 const Dashboard = () => {
 
-  const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
-  const chat = useChat();
+    const chat = useChat();
 
 
-  /*
-  |--------------------------------------------------------------------------
-  | REDUX STATE
-  |--------------------------------------------------------------------------
-  */
+    /*
+    |--------------------------------------------------------------------------
+    | REDUX STATE
+    |--------------------------------------------------------------------------
+    */
 
-  const chats = useSelector(
-    (state) => state.chat.chats
-  );
+    const chats = useSelector(
+        (state) => state.chat.chats
+    );
 
-  const currentChatId = useSelector(
-    (state) => state.chat.currentChatId
-  );
+    const currentChatId = useSelector(
+        (state) => state.chat.currentChatId
+    );
 
-  const loading = useSelector(
-    (state) => state.chat.loading
-  );
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | LOCAL STATE
-  |--------------------------------------------------------------------------
-  */
-
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-
-    if (typeof window !== 'undefined') {
-      return window.innerWidth >= 1024;
-    }
-
-    return true;
-  });
-
-
-  const [message, setMessage] = useState('');
-
-  const [messages, setMessages] = useState([]);
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | DELETE CONFIRMATION STATE
-  |--------------------------------------------------------------------------
-  */
-
-  const [deleteChatId, setDeleteChatId] = useState(null);
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | AUTO SCROLL
-  |--------------------------------------------------------------------------
-  */
-
-  const messagesEndRef = useRef(null);
-
-
-  useEffect(() => {
-
-    messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'end'
-    });
-
-  }, [messages, loading]);
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | SOCKET CONNECTION
-  |--------------------------------------------------------------------------
-  */
-
-  useEffect(() => {
-
-    chat.initializeSocketConnection();
-
-  }, []);
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | GET ALL CHATS
-  |--------------------------------------------------------------------------
-  */
-
-  useEffect(() => {
-
-    const fetchChats = async () => {
-
-      try {
-
-        const data = await getChats();
-
-        const fetchedChats = data?.chats || [];
-
-        const chatsObject = {};
-
-        fetchedChats.forEach((chatItem) => {
-
-          chatsObject[chatItem._id] = {
-
-            id: chatItem._id,
-
-            title: chatItem.title,
-
-            messages: [],
-
-            lastUpdated:
-              chatItem.updatedAt ||
-              chatItem.createdAt ||
-              new Date().toISOString()
-
-          };
-
-        });
-
-
-        dispatch(setChats(chatsObject));
-
-      }
-      catch (error) {
-
-        if (error.response?.status === 404) {
-
-          dispatch(setChats({}));
-
-          return;
-
-        }
-
-
-        dispatch(
-          setError(
-            error.response?.data?.message ||
-            "Something went wrong while fetching chats"
-          )
-        );
-
-      }
-
-    };
-
-
-    fetchChats();
-
-  }, [dispatch]);
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | SELECT CHAT
-  |--------------------------------------------------------------------------
-  */
-
-  const handleSelectChat = async (chatId) => {
-
-    try {
-
-      dispatch(
-        setcurrentChatId(chatId)
-      );
-
-
-      const data = await getMessages(chatId);
-
-      const fetchedMessages =
-        data?.messages || [];
-
-
-      const formattedMessages =
-        fetchedMessages.map((item) => ({
-          id: item._id,
-          content: item.content,
-          role: item.role
-        }));
-
-
-      setMessages(formattedMessages);
-
-    }
-    catch (error) {
-
-      dispatch(
-        setError(
-          error.response?.data?.message ||
-          "Something went wrong while loading messages"
-        )
-      );
-
-    }
-
-  };
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | NEW CHAT
-  |--------------------------------------------------------------------------
-  */
-
-  const handleNewChat = () => {
-
-    dispatch(
-      setcurrentChatId(null)
+    const loading = useSelector(
+        (state) => state.chat.loading
     );
 
 
-    setMessages([]);
+    /*
+    |--------------------------------------------------------------------------
+    | LOCAL STATE
+    |--------------------------------------------------------------------------
+    */
 
-  };
+    const [sidebarOpen, setSidebarOpen] = useState(() => {
 
+        if (typeof window !== 'undefined') {
+            return window.innerWidth >= 1024;
+        }
 
-  /*
-  |--------------------------------------------------------------------------
-  | SEND MESSAGE
-  |--------------------------------------------------------------------------
-  */
-
-  const handleSend = async (e) => {
-
-    e.preventDefault();
-
-
-    const trimmedMessage =
-      message.trim();
+        return true;
+    });
 
 
-    if (!trimmedMessage) {
-      return;
-    }
+    const [message, setMessage] = useState('');
+
+    const [messages, setMessages] = useState([]);
+
+    const [deleteChatId, setDeleteChatId] = useState(null);
 
 
     /*
     |--------------------------------------------------------------------------
-    | SAVE CURRENT CHAT ID
+    | AUTO SCROLL
     |--------------------------------------------------------------------------
     */
 
-    const chatIdAtStart =
-      currentChatId;
+    const messagesEndRef = useRef(null);
+
+
+    useEffect(() => {
+
+        messagesEndRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'end'
+        });
+
+    }, [messages, loading]);
 
 
     /*
     |--------------------------------------------------------------------------
-    | SHOW USER MESSAGE IMMEDIATELY
+    | SOCKET CONNECTION
     |--------------------------------------------------------------------------
     */
 
-    const temporaryUserMessage = {
+    useEffect(() => {
 
-      id: Date.now(),
+        chat.initializeSocketConnection();
 
-      role: 'user',
+    }, []);
 
-      content: trimmedMessage
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET ALL CHATS
+    |--------------------------------------------------------------------------
+    */
+
+    useEffect(() => {
+
+        const fetchChats = async () => {
+
+            try {
+
+                const data = await getChats();
+
+                const fetchedChats =
+                    data?.chats || [];
+
+                const chatsObject = {};
+
+
+                fetchedChats.forEach(
+                    (chatItem) => {
+
+                        chatsObject[chatItem._id] = {
+
+                            id: chatItem._id,
+
+                            title: chatItem.title,
+
+                            messages: [],
+
+                            lastUpdated:
+                                chatItem.updatedAt ||
+                                chatItem.createdAt ||
+                                new Date().toISOString()
+
+                        };
+
+                    }
+                );
+
+
+                dispatch(
+                    setChats(chatsObject)
+                );
+
+            }
+            catch (error) {
+
+                if (
+                    error.response?.status === 404
+                ) {
+
+                    dispatch(
+                        setChats({})
+                    );
+
+                    return;
+                }
+
+
+                dispatch(
+                    setError(
+                        error.response?.data?.message ||
+                        "Something went wrong while fetching chats"
+                    )
+                );
+
+            }
+
+        };
+
+
+        fetchChats();
+
+    }, [dispatch]);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SELECT CHAT
+    |--------------------------------------------------------------------------
+    */
+
+    const handleSelectChat = async (
+        chatId
+    ) => {
+
+        try {
+
+            dispatch(
+                setcurrentChatId(chatId)
+            );
+
+
+            const data =
+                await getMessages(chatId);
+
+
+            const fetchedMessages =
+                data?.messages || [];
+
+
+            const formattedMessages =
+                fetchedMessages.map(
+                    (item) => ({
+
+                        id: item._id,
+
+                        content: item.content,
+
+                        role: item.role
+
+                    })
+                );
+
+
+            setMessages(
+                formattedMessages
+            );
+
+        }
+        catch (error) {
+
+            dispatch(
+                setError(
+                    error.response?.data?.message ||
+                    "Something went wrong while loading messages"
+                )
+            );
+
+        }
 
     };
 
 
-    setMessages((prev) => [
+    /*
+    |--------------------------------------------------------------------------
+    | NEW CHAT
+    |--------------------------------------------------------------------------
+    */
 
-      ...prev,
-
-      temporaryUserMessage
-
-    ]);
-
-
-    setMessage('');
-
-
-    try {
-
-      /*
-      |--------------------------------------------------------------------------
-      | SEND API REQUEST
-      |--------------------------------------------------------------------------
-      */
-
-      const data =
-        await chat.handleSendMessages({
-
-          message: trimmedMessage,
-
-          chatId: chatIdAtStart
-
-        });
-
-      /*
-      |--------------------------------------------------------------------------
-      | NEW CHAT
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        !chatIdAtStart &&
-        data?.chat
-      ) {
-
-        const newChatId =
-          data.chat._id;
-
+    const handleNewChat = () => {
 
         dispatch(
-          setcurrentChatId(newChatId)
+            setcurrentChatId(null)
         );
+
+
+        setMessages([]);
+
+    };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEND MESSAGE
+    |--------------------------------------------------------------------------
+    */
+
+    const handleSend = async (e) => {
+
+        e.preventDefault();
+
+
+        const trimmedMessage =
+            message.trim();
+
+
+        if (!trimmedMessage) {
+            return;
+        }
 
 
         /*
         |--------------------------------------------------------------------------
-        | AI RESPONSE
+        | SAVE CURRENT CHAT ID
         |--------------------------------------------------------------------------
         */
 
-        if (data?.aiMessage) {
+        const chatIdAtStart =
+            currentChatId;
 
-          setMessages((prev) => [
 
-            ...prev,
+        /*
+        |--------------------------------------------------------------------------
+        | SHOW USER MESSAGE IMMEDIATELY
+        |--------------------------------------------------------------------------
+        */
 
-            {
+        const temporaryUserMessage = {
 
-              id:
-                data.aiMessage._id ||
-                Date.now() + 1,
+            id: Date.now(),
 
-              role:
-                data.aiMessage.role ||
-                'ai',
+            role: 'user',
 
-              content:
-                data.aiMessage.content ||
-                ''
+            content: trimmedMessage
+
+        };
+
+
+        setMessages(
+            (prev) => [
+
+                ...prev,
+
+                temporaryUserMessage
+
+            ]
+        );
+
+
+        setMessage('');
+
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | SEND API REQUEST
+            |--------------------------------------------------------------------------
+            */
+
+            const data =
+                await chat.handleSendMessages({
+
+                    message: trimmedMessage,
+
+                    chatId: chatIdAtStart
+
+                });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NEW CHAT
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                !chatIdAtStart &&
+                data?.chat
+            ) {
+
+                const newChatId =
+                    data.chat._id;
+
+
+                dispatch(
+                    setcurrentChatId(
+                        newChatId
+                    )
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | AI RESPONSE
+                |--------------------------------------------------------------------------
+                */
+
+                if (data?.aiMessage) {
+
+                    setMessages(
+                        (prev) => [
+
+                            ...prev,
+
+                            {
+
+                                id:
+                                    data.aiMessage._id ||
+                                    Date.now() + 1,
+
+                                role:
+                                    data.aiMessage.role ||
+                                    'ai',
+
+                                content:
+                                    data.aiMessage.content ||
+                                    ''
+
+                            }
+
+                        ]
+                    );
+
+                }
 
             }
 
-          ]);
 
-        }
+            /*
+            |--------------------------------------------------------------------------
+            | EXISTING CHAT
+            |--------------------------------------------------------------------------
+            */
 
-      }
+            else if (chatIdAtStart) {
 
+                if (data?.aiMessage) {
 
-      /*
-      |--------------------------------------------------------------------------
-      | EXISTING CHAT
-      |--------------------------------------------------------------------------
-      */
+                    setMessages(
+                        (prev) => [
 
-      else if (chatIdAtStart) {
+                            ...prev,
 
-        if (data?.aiMessage) {
+                            {
 
-          setMessages((prev) => [
+                                id:
+                                    data.aiMessage._id ||
+                                    Date.now() + 1,
 
-            ...prev,
+                                role:
+                                    data.aiMessage.role ||
+                                    'ai',
 
-            {
+                                content:
+                                    data.aiMessage.content ||
+                                    ''
 
-              id:
-                data.aiMessage._id ||
-                Date.now() + 1,
+                            }
 
-              role:
-                data.aiMessage.role ||
-                'ai',
+                        ]
+                    );
 
-              content:
-                data.aiMessage.content ||
-                ''
+                }
 
             }
 
-          ]);
+        }
+        catch (error) {
+
+            console.error(
+                'Error while sending message:',
+                error
+            );
 
         }
 
-      }
-
-    }
-    catch (error) {
-
-      console.error(
-        'Error while sending message:',
-        error
-      );
-
-    }
-
-  };
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | OPEN DELETE CONFIRMATION
-  |--------------------------------------------------------------------------
-  */
-
-  const handleDeleteChat = (
-    e,
-    chatId
-  ) => {
-
-    e.stopPropagation();
+    };
 
 
     /*
-     * Don't delete immediately.
-     *
-     * Just remember which chat user wants
-     * to delete and open confirmation popup.
-     */
+    |--------------------------------------------------------------------------
+    | OPEN DELETE CONFIRMATION
+    |--------------------------------------------------------------------------
+    */
 
-    setDeleteChatId(chatId);
+    const handleDeleteChat = (
+        e,
+        chatId
+    ) => {
 
-  };
+        e.stopPropagation();
 
+        setDeleteChatId(chatId);
 
-  /*
-  |--------------------------------------------------------------------------
-  | CONFIRM DELETE CHAT
-  |--------------------------------------------------------------------------
-  */
-
-  const confirmDeleteChat = async () => {
-
-    if (!deleteChatId) {
-      return;
-    }
+    };
 
 
-    try {
+    /*
+    |--------------------------------------------------------------------------
+    | CONFIRM DELETE CHAT
+    |--------------------------------------------------------------------------
+    */
 
-      await deletChat(deleteChatId);
+    const confirmDeleteChat = async () => {
 
-
-      /*
-       * Remove chat from Redux.
-       */
-
-      dispatch(
-        deleteChatFromStore(deleteChatId)
-      );
-
-
-      /*
-       * If currently selected chat was deleted,
-       * clear its messages.
-       */
-
-      if (
-        currentChatId === deleteChatId
-      ) {
-
-        setMessages([]);
-
-      }
+        if (!deleteChatId) {
+            return;
+        }
 
 
-      /*
-       * Close confirmation popup.
-       */
+        try {
 
-      setDeleteChatId(null);
-
-    }
-    catch (error) {
-
-      dispatch(
-        setError(
-          error.response?.data?.message ||
-          "Something went wrong while deleting chat"
-        )
-      );
-
-    }
-
-  };
+            await deletChat(
+                deleteChatId
+            );
 
 
-  /*
-  |--------------------------------------------------------------------------
-  | CANCEL DELETE
-  |--------------------------------------------------------------------------
-  */
+            /*
+            |--------------------------------------------------------------------------
+            | REMOVE FROM REDUX
+            |--------------------------------------------------------------------------
+            */
 
-  const cancelDeleteChat = () => {
-
-    setDeleteChatId(null);
-
-  };
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | ENTER KEY SEND
-  |--------------------------------------------------------------------------
-  */
-
-  const handleKeyDown = (e) => {
-
-    if (
-      e.key === 'Enter' &&
-      !e.shiftKey
-    ) {
-
-      e.preventDefault();
-
-      handleSend(e);
-
-    }
-
-  };
+            dispatch(
+                deleteChatFromStore(
+                    deleteChatId
+                )
+            );
 
 
-  /*
-  |--------------------------------------------------------------------------
-  | EMPTY CHAT CHECK
-  |--------------------------------------------------------------------------
-  */
+            /*
+            |--------------------------------------------------------------------------
+            | IF CURRENT CHAT WAS DELETED
+            |--------------------------------------------------------------------------
+            */
 
-  const isEmptyChat =
-    !currentChatId &&
-    messages.length === 0;
+            if (
+                currentChatId === deleteChatId
+            ) {
+
+                setMessages([]);
+
+                dispatch(
+                    setcurrentChatId(null)
+                );
+
+            }
 
 
-  return (
-    <div className="h-screen w-full bg-[#090d17] overflow-hidden select-none">
+            /*
+            |--------------------------------------------------------------------------
+            | CLOSE MODAL
+            |--------------------------------------------------------------------------
+            */
 
-      {/* Main Qevro Container */}
+            setDeleteChatId(null);
 
-      <div className="relative h-full w-full overflow-hidden bg-gray-950">
+        }
+        catch (error) {
 
-        {/* Background Aura */}
+            dispatch(
+                setError(
+                    error.response?.data?.message ||
+                    "Something went wrong while deleting chat"
+                )
+            );
 
+        }
+
+    };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CANCEL DELETE
+    |--------------------------------------------------------------------------
+    */
+
+    const cancelDeleteChat = () => {
+
+        setDeleteChatId(null);
+
+    };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENTER KEY SEND
+    |--------------------------------------------------------------------------
+    */
+
+    const handleKeyDown = (e) => {
+
+        if (
+            e.key === 'Enter' &&
+            !e.shiftKey
+        ) {
+
+            e.preventDefault();
+
+            handleSend(e);
+
+        }
+
+    };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EMPTY CHAT CHECK
+    |--------------------------------------------------------------------------
+    */
+
+    const isEmptyChat =
+        !currentChatId &&
+        messages.length === 0;
+
+
+    return (
         <div
-          className="
-            absolute -top-52 -left-52
-            w-[650px] h-[650px]
-            rounded-full
-            bg-indigo-700/20
-            blur-[130px]
-            pointer-events-none
-          "
-        />
+            className="
+                h-screen
+                w-full
+                bg-[#090d17]
+                overflow-hidden
+                select-none
+            "
+        >
 
-        <div
-          className="
-            absolute -bottom-52 left-[30%]
-            w-[650px] h-[650px]
-            rounded-full
-            bg-purple-700/20
-            blur-[130px]
-            pointer-events-none
-          "
-        />
-
-        <div
-          className="
-            absolute -top-52 -right-52
-            w-[650px] h-[650px]
-            rounded-full
-            bg-indigo-700/15
-            blur-[130px]
-            pointer-events-none
-          "
-        />
-
-
-        {/* Main Layout */}
-
-        <div className="relative flex h-full">
-
-
-          {/* SIDEBAR */}
-
-          <aside
-            className={`
-              shrink-0 h-full
-              border-r border-gray-800/80
-              bg-gray-900/60
-              backdrop-blur-xl
-              transition-all duration-300 ease-in-out
-
-              lg:relative
-              lg:z-auto
-
-              ${
-                sidebarOpen
-                  ? `
-                    w-[290px]
-                    fixed inset-y-0 left-0 z-50
-                    lg:relative lg:w-[290px]
-                  `
-                  : `
-                    w-0
-                    fixed inset-y-0 left-0 z-40
-                    border-r-0
-                    bg-transparent
-                    lg:relative lg:w-0
-                  `
-              }
-            `}
-          >
+            {/* Main Qevro Container */}
 
             <div
-              className={`
-                h-full flex flex-col p-4
-
-                ${
-                  sidebarOpen
-                    ? 'opacity-100'
-                    : 'opacity-0 pointer-events-none'
-                }
-              `}
-            >
-
-
-              {/* Sidebar Header */}
-
-              <div className="flex items-center justify-between mb-8">
-
-                {/* Logo */}
-
-                <h1
-                  className="
-                    text-2xl
-                    font-semibold
-                    tracking-tight
-                    text-white
-                    whitespace-nowrap
-                  "
-                >
-                  Qevro<span className="text-indigo-400">Ai.</span>
-                </h1>
-
-
-                {/* Collapse */}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSidebarOpen(false)
-                  }
-                  className="
-                    w-10 h-10 shrink-0
-                    rounded-lg
-                    border border-gray-700
-                    bg-gray-800/80
-                    text-gray-300
-                    flex items-center justify-center
-                    cursor-pointer
-                    hover:bg-gray-700
-                    hover:text-white
-                    transition-all duration-200
-                  "
-                >
-                  <PanelRightOpen size={19} />
-                </button>
-
-              </div>
-
-
-              {/* NEW CHAT */}
-
-              <button
-                type="button"
-                onClick={handleNewChat}
                 className="
-                  w-full
-                  h-12
-                  mb-4
-                  px-4
-                  rounded-xl
-                  border border-gray-700/80
-                  bg-gray-800/50
-                  text-gray-300
-                  flex items-center justify-center
-                  cursor-pointer
-                  hover:bg-gray-800
-                  hover:border-gray-600
-                  hover:text-white
-                  transition-all duration-200
-                "
-              >
-                + New Chat
-              </button>
-
-
-              {/* Chat Titles */}
-
-              <div
-                className="
-                  flex-1
-                  overflow-y-auto
-                  [scrollbar-width:none]
-                  [&::-webkit-scrollbar]:hidden
-                "
-              >
-
-                <div className="space-y-3">
-
-                  {Object.values(chats).map(
-                    (chatItem) => (
-
-                      <div
-                        key={chatItem.id}
-                        onClick={() =>
-                          handleSelectChat(
-                            chatItem.id
-                          )
-                        }
-                        className="
-                          group
-                          w-full
-                          h-12
-                          px-4
-                          rounded-xl
-                          border border-gray-700/80
-                          bg-gray-800/50
-                          flex items-center justify-between
-                          cursor-pointer
-                          hover:bg-gray-800
-                          hover:border-gray-600
-                          transition-all duration-200
-                        "
-                      >
-
-                        <span
-                          className="
-                            text-sm
-                            text-gray-300
-                            truncate
-                          "
-                        >
-                          {chatItem.title}
-                        </span>
-
-
-                        {/* Delete */}
-
-                        <button
-                          type="button"
-                          onClick={(e) =>
-                            handleDeleteChat(
-                              e,
-                              chatItem.id
-                            )
-                          }
-                          className="
-                            shrink-0
-                            ml-3
-                            text-gray-400/70
-                            hover:text-gray-300
-                            cursor-pointer
-                            transition-all duration-200
-                            hover:scale-110
-                          "
-                        >
-                          <Trash2 size={16} />
-                        </button>
-
-                      </div>
-
-                    )
-                  ).reverse()}
-
-                </div>
-
-              </div>
-
-
-              {/* Sidebar Bottom */}
-
-              <div
-                className="
-                  pt-4
-                  border-t border-gray-800
-                  flex items-center justify-between
-                "
-              >
-
-                {/* Logout */}
-
-                <button
-                  type="button"
-                  className="
-                    w-10 h-10
-                    rounded-full
-                    bg-red-500
-                    text-white
-                    flex items-center justify-center
-                    cursor-pointer
-                    hover:bg-red-400
-                    hover:scale-105
-                    transition-all duration-200
-                  "
-                >
-                  <LogOut size={19} />
-                </button>
-
-
-                {/* User Icon */}
-
-                <button
-                  type="button"
-                  className="
-                    w-10 h-10
-                    rounded-full
-                    bg-white
-                    text-gray-900
-                    flex items-center justify-center
-                    cursor-pointer
-                    hover:bg-indigo-100
-                    hover:scale-105
-                    transition-all duration-200
-                  "
-                >
-                  <UserRound size={19} />
-                </button>
-
-              </div>
-
-            </div>
-
-          </aside>
-
-
-          {/* MOBILE SIDEBAR OVERLAY */}
-
-          {sidebarOpen && (
-            <div
-              onClick={() =>
-                setSidebarOpen(false)
-              }
-              className="
-                fixed
-                inset-0
-                z-40
-                bg-black/40
-                lg:hidden
-              "
-            />
-          )}
-
-
-          {/* DESKTOP SIDEBAR OPEN BUTTON */}
-
-          {!sidebarOpen && (
-            <button
-              type="button"
-              onClick={() =>
-                setSidebarOpen(true)
-              }
-              className="
-                hidden
-                lg:flex
-                fixed
-                top-5
-                left-4
-                z-50
-                w-10 h-10
-                rounded-lg
-                border border-gray-700
-                bg-gray-800/90
-                text-gray-300
-                items-center justify-center
-                cursor-pointer
-                hover:bg-gray-700
-                hover:text-white
-                transition-all duration-200
-              "
-            >
-              <PanelLeftOpen size={19} />
-            </button>
-          )}
-
-
-          {/* CHAT AREA */}
-
-          <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-black/30">
-
-
-            {/* MOBILE TOP BAR */}
-
-            <div
-              className="
-                lg:hidden
-                relative
-                h-16
-                shrink-0
-                flex items-center
-                px-4
-                bg-[#05070b]
-                border-b border-gray-800/60
-              "
-            >
-
-              {!sidebarOpen && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSidebarOpen(true)
-                  }
-                  className="
                     relative
-                    z-50
-                    w-10 h-10
-                    rounded-lg
-                    border border-gray-700
-                    bg-[#05070b]
-                    text-gray-300
-                    flex items-center justify-center
-                    cursor-pointer
-                    hover:bg-gray-900
-                    hover:text-white
-                    transition-all duration-200
-                  "
-                >
-                  <PanelLeftOpen size={19} />
-                </button>
-              )}
-
-            </div>
-
-
-            {/* MESSAGES AREA */}
-
-            <div
-              className="
-                relative
-                flex-1
-                min-h-0
-                overflow-y-auto
-                [scrollbar-width:none]
-                [&::-webkit-scrollbar]:hidden
-                px-4
-                py-6
-                sm:px-6
-                sm:py-8
-                lg:px-8
-                bg-[#05070b]
-              "
-            >
-
-              {/* EMPTY NEW CHAT */}
-
-              {isEmptyChat ? (
-
-                <div
-                  className="
                     h-full
-                    flex
-                    flex-col
-                    items-center
-                    justify-center
-                    text-center
-                  "
-                >
-
-                  <BotMessageSquare
-                    size={42}
-                    strokeWidth={1.8}
-                    className="
-                      text-indigo-400
-                      mb-5
-                    "
-                  />
-
-                  <h2
-                    className="
-                      text-2xl
-                      sm:text-3xl
-                      font-semibold
-                      text-gray-200
-                      tracking-tight
-                    "
-                  >
-                    Welcome to Qevro-Ai
-                  </h2>
-
-                  <p
-                    className="
-                      mt-2
-                      text-sm
-                      text-gray-500
-                    "
-                  >
-                    Ask anything and start a new conversation.
-                  </p>
-
-                </div>
-
-              ) : (
-
-                <div
-                  className="
-                    relative
-                    max-w-5xl
-                    mx-auto
-                    space-y-1
-                  "
-                >
-
-                  {/* MESSAGES */}
-
-                  {messages.map((item) => (
-
-                    <div
-                      key={item.id}
-                      className={
-                        item.role === 'user'
-                          ? 'flex justify-end'
-                          : 'flex justify-start'
-                      }
-                    >
-
-                      {item.role === 'user' ? (
-
-                        /* USER MESSAGE */
-
-                        <div
-                          className="
-                            max-w-[88%]
-                            sm:max-w-[75%]
-                            lg:max-w-[70%]
-                            px-5 py-4
-                            rounded-2xl
-                            border border-indigo-400/30
-                            bg-indigo-500
-                            text-white
-                            text-sm
-                            leading-6
-                            shadow-lg
-                            break-words
-                          "
-                        >
-                          {item.content}
-                        </div>
-
-                      ) : (
-
-                        /* AI RESPONSE */
-
-                        <div
-                          className="
-                            w-full
-                            rounded-3xl
-                            border-0
-                            lg:border
-                            border-gray-800
-                            bg-black/80
-                            shadow-2xl
-                            px-5 py-6
-                            sm:px-8
-                            sm:py-8
-                          "
-                        >
-
-                          <p
-                            className="
-                              text-gray-300
-                              text-sm
-                              leading-7
-                            "
-                          >
-                            {item.content}
-                          </p>
-
-                        </div>
-
-                      )}
-
-                    </div>
-
-                  ))}
-
-
-                  {/* AI THINKING PLACEHOLDER */}
-
-                  {loading && (
-
-                    <div
-                      className="
-                        flex
-                        justify-start
-                      "
-                    >
-
-                      <div
-                        className="
-                          w-full
-                          rounded-3xl
-                          border-0
-                          lg:border
-                          border-gray-800
-                          bg-black/80
-                          shadow-2xl
-                          px-5 py-6
-                          sm:px-8
-                          sm:py-8
-                        "
-                      >
-
-                        <div
-                          className="
-                            flex
-                            items-center
-                            gap-3
-                            text-gray-400
-                          "
-                        >
-
-                          <BotMessageSquare
-                            size={19}
-                            className="text-indigo-400"
-                          />
-
-                          <span className="text-sm">
-                            Qevro-Ai is thinking...
-                          </span>
-
-                          <span
-                            className="
-                              flex
-                              gap-1
-                              ml-1
-                            "
-                          >
-
-                            <span className="animate-bounce">
-                              .
-                            </span>
-
-                            <span
-                              className="
-                                animate-bounce
-                                [animation-delay:150ms]
-                              "
-                            >
-                              .
-                            </span>
-
-                            <span
-                              className="
-                                animate-bounce
-                                [animation-delay:300ms]
-                              "
-                            >
-                              .
-                            </span>
-
-                          </span>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                  )}
-
-
-                  {/* AUTO SCROLL TARGET */}
-
-                  <div
-                    ref={messagesEndRef}
-                    className="h-px w-full"
-                  />
-
-                </div>
-
-              )}
-
-            </div>
-
-
-            {/* INPUT */}
-
-            <div
-              className="
-                shrink-0
-                px-4
-                pb-4
-                pt-3
-                sm:px-6
-                sm:pb-5
-                lg:px-8
-                lg:pb-7
-                lg:pt-4
-                bg-black/40
-                border-t border-gray-800/60
-              "
+                    w-full
+                    overflow-hidden
+                    bg-gray-950
+                "
             >
 
-              <form
-                onSubmit={handleSend}
-                className="max-w-4xl mx-auto"
-              >
+                {/* Background Aura */}
 
                 <div
-                  className="
-                    relative
-                    min-h-[64px]
-                    rounded-2xl
-                    border border-gray-700
-                    bg-gray-900
-                    shadow-lg
-                    focus-within:border-indigo-500
-                    focus-within:ring-1
-                    focus-within:ring-indigo-500/30
-                    transition-all duration-200
-                  "
-                >
-
-                  <textarea
-                    value={message}
-                    onChange={(e) =>
-                      setMessage(e.target.value)
-                    }
-                    onKeyDown={handleKeyDown}
-                    placeholder="Ask anything"
-                    rows={1}
                     className="
-                      w-full
-                      min-h-[64px]
-                      resize-none
-                      overflow-hidden
-                      bg-transparent
-                      outline-none
-                      border-none
-                      text-sm
-                      text-gray-200
-                      placeholder:text-gray-300
-                      px-5
-                      py-5
-                      pr-16
+                        absolute
+                        -top-52
+                        -left-52
+                        w-[650px]
+                        h-[650px]
+                        rounded-full
+                        bg-indigo-700/20
+                        blur-[130px]
+                        pointer-events-none
                     "
-                  />
+                />
 
 
-                  {/* SEND / BOT BUTTON */}
-
-                  <button
-                    type="submit"
-                    disabled={loading}
+                <div
                     className="
-                      absolute
-                      right-3
-                      top-1/2
-                      -translate-y-1/2
-                      w-10 h-10
-                      rounded-full
-                      bg-indigo-500
-                      text-white
-                      flex items-center justify-center
-                      cursor-pointer
-                      transition-all duration-200
-                      hover:bg-indigo-400
-                      hover:scale-110
-                      active:scale-95
+                        absolute
+                        -bottom-52
+                        left-[30%]
+                        w-[650px]
+                        h-[650px]
+                        rounded-full
+                        bg-purple-700/20
+                        blur-[130px]
+                        pointer-events-none
                     "
-                  >
+                />
 
-                    {message.trim() ? (
 
-                      <Send size={18} />
+                <div
+                    className="
+                        absolute
+                        -top-52
+                        -right-52
+                        w-[650px]
+                        h-[650px]
+                        rounded-full
+                        bg-indigo-700/15
+                        blur-[130px]
+                        pointer-events-none
+                    "
+                />
 
-                    ) : (
 
-                      <BotMessageSquare
-                        size={20}
-                        strokeWidth={2}
-                      />
+                {/* Main Layout */}
 
-                    )}
+                <div className="relative flex h-full">
 
-                  </button>
+
+                    {/* SIDEBAR */}
+
+                    <ChatSidebar
+                        chats={chats}
+                        sidebarOpen={sidebarOpen}
+                        setSidebarOpen={setSidebarOpen}
+                        handleNewChat={handleNewChat}
+                        handleSelectChat={handleSelectChat}
+                        handleDeleteChat={handleDeleteChat}
+                    />
+
+
+                    {/* CHAT AREA */}
+
+                    <main
+                        className="
+                            flex-1
+                            min-w-0
+                            min-h-0
+                            flex
+                            flex-col
+                            bg-black/30
+                        "
+                    >
+
+                        {/* MOBILE TOP BAR */}
+
+                        <div
+                            className="
+                                lg:hidden
+                                relative
+                                h-16
+                                shrink-0
+                                flex
+                                items-center
+                                px-4
+                                bg-[#05070b]
+                                border-b
+                                border-gray-800/60
+                            "
+                        >
+
+                            {!sidebarOpen && (
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setSidebarOpen(true)
+                                    }
+                                    className="
+                                        relative
+                                        z-50
+                                        w-10
+                                        h-10
+                                        rounded-lg
+                                        border
+                                        border-gray-700
+                                        bg-[#05070b]
+                                        text-gray-300
+                                        flex
+                                        items-center
+                                        justify-center
+                                        cursor-pointer
+                                        hover:bg-gray-900
+                                        hover:text-white
+                                        transition-all
+                                        duration-200
+                                    "
+                                >
+                                    <PanelLeftOpen size={19} />
+                                </button>
+
+                            )}
+
+                        </div>
+
+
+                        {/* MESSAGES */}
+
+                        <ChatMessages
+                            messages={messages}
+                            loading={loading}
+                            isEmptyChat={isEmptyChat}
+                            messagesEndRef={messagesEndRef}
+                        />
+
+
+                        {/* INPUT */}
+
+                        <ChatInput
+                            message={message}
+                            setMessage={setMessage}
+                            handleSend={handleSend}
+                            handleKeyDown={handleKeyDown}
+                            loading={loading}
+                        />
+
+                    </main>
 
                 </div>
 
-              </form>
+
+                {/* DELETE MODAL */}
+
+                <DeleteChatModal
+                    deleteChatId={deleteChatId}
+                    confirmDeleteChat={confirmDeleteChat}
+                    cancelDeleteChat={cancelDeleteChat}
+                />
 
             </div>
-
-          </main>
 
         </div>
-
-
-        {/* ================================================================
-            DELETE CONFIRMATION MODAL
-        ================================================================= */}
-
-        {deleteChatId && (
-
-          <div
-            className="
-              fixed
-              inset-0
-              z-[100]
-              flex
-              items-center
-              justify-center
-              bg-black/70
-              backdrop-blur-sm
-              px-4
-            "
-          >
-
-            <div
-              className="
-                w-full
-                max-w-md
-                rounded-2xl
-                border border-gray-800
-                bg-black
-                shadow-2xl
-                p-6
-              "
-            >
-
-              {/* Modal Title */}
-
-              <h2
-                className="
-                  text-xl
-                  font-semibold
-                  text-white
-                "
-              >
-                Delete Chat?
-              </h2>
-
-
-              {/* Modal Message */}
-
-              <p
-                className="
-                  mt-3
-                  text-sm
-                  leading-6
-                  text-gray-400
-                "
-              >
-                Are you sure you want to delete this chat?
-                This action cannot be undone.
-              </p>
-
-
-              {/* Modal Buttons */}
-
-              <div
-                className="
-                  mt-6
-                  flex
-                  justify-end
-                  gap-3
-                "
-              >
-
-                {/* Cancel */}
-
-                <button
-                  type="button"
-                  onClick={cancelDeleteChat}
-                  className="
-                    px-5
-                    h-10
-                    rounded-lg
-                    border
-                    border-white
-                    bg-black
-                    text-white
-                    text-sm
-                    font-medium
-                    cursor-pointer
-                    hover:bg-gray-900
-                    transition-all duration-200
-                  "
-                >
-                  Cancel
-                </button>
-
-
-                {/* Delete */}
-
-                <button
-                  type="button"
-                  onClick={confirmDeleteChat}
-                  className="
-                    px-5
-                    h-10
-                    rounded-lg
-                    bg-red-500
-                    text-white
-                    text-sm
-                    font-medium
-                    cursor-pointer
-                    hover:bg-red-400
-                    transition-all duration-200
-                  "
-                >
-                  Delete
-                </button>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        )}
-
-      </div>
-
-    </div>
-  );
+    );
 };
 
 

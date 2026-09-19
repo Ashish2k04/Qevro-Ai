@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import {
   UserRound,
@@ -72,6 +72,34 @@ const Dummy = () => {
   const [message, setMessage] = useState('');
 
   const [messages, setMessages] = useState([]);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | DELETE CONFIRMATION STATE
+  |--------------------------------------------------------------------------
+  */
+
+  const [deleteChatId, setDeleteChatId] = useState(null);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | AUTO SCROLL
+  |--------------------------------------------------------------------------
+  */
+
+  const messagesEndRef = useRef(null);
+
+
+  useEffect(() => {
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end'
+    });
+
+  }, [messages, loading]);
 
 
   /*
@@ -409,11 +437,11 @@ const Dummy = () => {
 
   /*
   |--------------------------------------------------------------------------
-  | DELETE CHAT
+  | OPEN DELETE CONFIRMATION
   |--------------------------------------------------------------------------
   */
 
-  const handleDeleteChat = async (
+  const handleDeleteChat = (
     e,
     chatId
   ) => {
@@ -421,23 +449,64 @@ const Dummy = () => {
     e.stopPropagation();
 
 
+    /*
+     * Don't delete immediately.
+     *
+     * Just remember which chat user wants
+     * to delete and open confirmation popup.
+     */
+
+    setDeleteChatId(chatId);
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | CONFIRM DELETE CHAT
+  |--------------------------------------------------------------------------
+  */
+
+  const confirmDeleteChat = async () => {
+
+    if (!deleteChatId) {
+      return;
+    }
+
+
     try {
 
-      await deletChat(chatId);
+      await deletChat(deleteChatId);
 
+
+      /*
+       * Remove chat from Redux.
+       */
 
       dispatch(
-        deleteChatFromStore(chatId)
+        deleteChatFromStore(deleteChatId)
       );
 
 
+      /*
+       * If currently selected chat was deleted,
+       * clear its messages.
+       */
+
       if (
-        currentChatId === chatId
+        currentChatId === deleteChatId
       ) {
 
         setMessages([]);
 
       }
+
+
+      /*
+       * Close confirmation popup.
+       */
+
+      setDeleteChatId(null);
 
     }
     catch (error) {
@@ -450,6 +519,19 @@ const Dummy = () => {
       );
 
     }
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | CANCEL DELETE
+  |--------------------------------------------------------------------------
+  */
+
+  const cancelDeleteChat = () => {
+
+    setDeleteChatId(null);
 
   };
 
@@ -491,6 +573,7 @@ const Dummy = () => {
     <div className="h-screen w-full bg-[#090d17] overflow-hidden select-none">
 
       {/* Main Qevro Container */}
+
       <div className="relative h-full w-full overflow-hidden bg-gray-950">
 
         {/* Background Aura */}
@@ -1122,6 +1205,14 @@ const Dummy = () => {
 
                   )}
 
+
+                  {/* AUTO SCROLL TARGET */}
+
+                  <div
+                    ref={messagesEndRef}
+                    className="h-px w-full"
+                  />
+
                 </div>
 
               )}
@@ -1240,6 +1331,131 @@ const Dummy = () => {
           </main>
 
         </div>
+
+
+        {/* ================================================================
+            DELETE CONFIRMATION MODAL
+        ================================================================= */}
+
+        {deleteChatId && (
+
+          <div
+            className="
+              fixed
+              inset-0
+              z-[100]
+              flex
+              items-center
+              justify-center
+              bg-black/70
+              backdrop-blur-sm
+              px-4
+            "
+          >
+
+            <div
+              className="
+                w-full
+                max-w-md
+                rounded-2xl
+                border border-gray-800
+                bg-black
+                shadow-2xl
+                p-6
+              "
+            >
+
+              {/* Modal Title */}
+
+              <h2
+                className="
+                  text-xl
+                  font-semibold
+                  text-white
+                "
+              >
+                Delete Chat?
+              </h2>
+
+
+              {/* Modal Message */}
+
+              <p
+                className="
+                  mt-3
+                  text-sm
+                  leading-6
+                  text-gray-400
+                "
+              >
+                Are you sure you want to delete this chat?
+                This action cannot be undone.
+              </p>
+
+
+              {/* Modal Buttons */}
+
+              <div
+                className="
+                  mt-6
+                  flex
+                  justify-end
+                  gap-3
+                "
+              >
+
+                {/* Cancel */}
+
+                <button
+                  type="button"
+                  onClick={cancelDeleteChat}
+                  className="
+                    px-5
+                    h-10
+                    rounded-lg
+                    border
+                    border-white
+                    bg-black
+                    text-white
+                    text-sm
+                    font-medium
+                    cursor-pointer
+                    hover:bg-gray-900
+                    transition-all duration-200
+                  "
+                >
+                  Cancel
+                </button>
+
+
+                {/* Delete */}
+
+                <button
+                  type="button"
+                  onClick={confirmDeleteChat}
+                  className="
+                    px-5
+                    h-10
+                    rounded-lg
+                    bg-red-500
+                    text-white
+                    text-sm
+                    font-medium
+                    cursor-pointer
+                    hover:bg-red-400
+                    transition-all duration-200
+                  "
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
 
       </div>
 

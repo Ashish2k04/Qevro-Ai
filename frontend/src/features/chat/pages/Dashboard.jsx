@@ -1,5 +1,6 @@
-import { useSelector } from 'react-redux'
-import { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect, useState, useRef } from 'react';
+
 import {
   UserRound,
   PanelLeftOpen,
@@ -9,60 +10,567 @@ import {
   BotMessageSquare,
   LogOut,
 } from 'lucide-react';
-import { useChat } from '../hooks/useChat.js';
+
+import { useChat } from '../../chat/hooks/useChat.js';
+
+import {
+  setChats,
+  setcurrentChatId,
+  setError,
+  deleteChatFromStore,
+} from '../../chat/chat.slice.js';
+
+import {
+  getChats,
+  getMessages,
+  deletChat,
+} from '../../chat/services/chat.api.js';
+
 
 const Dashboard = () => {
 
-    const chat = useChat();
-    const chats = useSelector((state) => state.chat.chats);
-    const currentChatId = useSelector((state) => state.chat.currentChatId)
+  const dispatch = useDispatch();
 
-    // Desktop -> Open
-    // Mobile -> Closed
-    const [sidebarOpen, setSidebarOpen] = useState(() => {
-      if (typeof window !== 'undefined') {
-        return window.innerWidth >= 1024;
-      }
+  const chat = useChat();
 
-      return true;
+
+  /*
+  |--------------------------------------------------------------------------
+  | REDUX STATE
+  |--------------------------------------------------------------------------
+  */
+
+  const chats = useSelector(
+    (state) => state.chat.chats
+  );
+
+  const currentChatId = useSelector(
+    (state) => state.chat.currentChatId
+  );
+
+  const loading = useSelector(
+    (state) => state.chat.loading
+  );
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | LOCAL STATE
+  |--------------------------------------------------------------------------
+  */
+
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+
+    return true;
+  });
+
+
+  const [message, setMessage] = useState('');
+
+  const [messages, setMessages] = useState([]);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | DELETE CONFIRMATION STATE
+  |--------------------------------------------------------------------------
+  */
+
+  const [deleteChatId, setDeleteChatId] = useState(null);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | AUTO SCROLL
+  |--------------------------------------------------------------------------
+  */
+
+  const messagesEndRef = useRef(null);
+
+
+  useEffect(() => {
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end'
     });
 
-    const [message, setMessage] = useState('');
+  }, [messages, loading]);
 
-    // const [chats, setChats] = useState([
-    //   'Building a REST API',
-    //   'Explain Redis caching',
-    //   'React authentication',
-    //   'System design basics',
-    //   'MongoDB aggregation',
-    // ]);
 
-    // console.log(user)
+  /*
+  |--------------------------------------------------------------------------
+  | SOCKET CONNECTION
+  |--------------------------------------------------------------------------
+  */
 
-    useEffect(() => {
-      chat.initializeSocketConnection();
-    }, [])
+  useEffect(() => {
 
-    const deleteChat = (index) => {
-      setChats(chats.filter((_, i) => i !== index));
+    chat.initializeSocketConnection();
+
+  }, []);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | GET ALL CHATS
+  |--------------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+
+    const fetchChats = async () => {
+
+      try {
+
+        const data = await getChats();
+
+        const fetchedChats = data?.chats || [];
+
+        const chatsObject = {};
+
+        fetchedChats.forEach((chatItem) => {
+
+          chatsObject[chatItem._id] = {
+
+            id: chatItem._id,
+
+            title: chatItem.title,
+
+            messages: [],
+
+            lastUpdated:
+              chatItem.updatedAt ||
+              chatItem.createdAt ||
+              new Date().toISOString()
+
+          };
+
+        });
+
+
+        dispatch(setChats(chatsObject));
+
+      }
+      catch (error) {
+
+        if (error.response?.status === 404) {
+
+          dispatch(setChats({}));
+
+          return;
+
+        }
+
+
+        dispatch(
+          setError(
+            error.response?.data?.message ||
+            "Something went wrong while fetching chats"
+          )
+        );
+
+      }
+
+    };
+
+
+    fetchChats();
+
+  }, [dispatch]);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | SELECT CHAT
+  |--------------------------------------------------------------------------
+  */
+
+  const handleSelectChat = async (chatId) => {
+
+    try {
+
+      dispatch(
+        setcurrentChatId(chatId)
+      );
+
+
+      const data = await getMessages(chatId);
+
+      const fetchedMessages =
+        data?.messages || [];
+
+
+      const formattedMessages =
+        fetchedMessages.map((item) => ({
+          id: item._id,
+          content: item.content,
+          role: item.role
+        }));
+
+
+      setMessages(formattedMessages);
+
+    }
+    catch (error) {
+
+      dispatch(
+        setError(
+          error.response?.data?.message ||
+          "Something went wrong while loading messages"
+        )
+      );
+
     }
 
-    const handleSend = (e) => {
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | NEW CHAT
+  |--------------------------------------------------------------------------
+  */
+
+  const handleNewChat = () => {
+
+    dispatch(
+      setcurrentChatId(null)
+    );
+
+
+    setMessages([]);
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | SEND MESSAGE
+  |--------------------------------------------------------------------------
+  */
+
+  const handleSend = async (e) => {
+
+    e.preventDefault();
+
+
+    const trimmedMessage =
+      message.trim();
+
+
+    if (!trimmedMessage) {
+      return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SAVE CURRENT CHAT ID
+    |--------------------------------------------------------------------------
+    */
+
+    const chatIdAtStart =
+      currentChatId;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW USER MESSAGE IMMEDIATELY
+    |--------------------------------------------------------------------------
+    */
+
+    const temporaryUserMessage = {
+
+      id: Date.now(),
+
+      role: 'user',
+
+      content: trimmedMessage
+
+    };
+
+
+    setMessages((prev) => [
+
+      ...prev,
+
+      temporaryUserMessage
+
+    ]);
+
+
+    setMessage('');
+
+
+    try {
+
+      /*
+      |--------------------------------------------------------------------------
+      | SEND API REQUEST
+      |--------------------------------------------------------------------------
+      */
+
+      const data =
+        await chat.handleSendMessages({
+
+          message: trimmedMessage,
+
+          chatId: chatIdAtStart
+
+        });
+
+      /*
+      |--------------------------------------------------------------------------
+      | NEW CHAT
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        !chatIdAtStart &&
+        data?.chat
+      ) {
+
+        const newChatId =
+          data.chat._id;
+
+
+        dispatch(
+          setcurrentChatId(newChatId)
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AI RESPONSE
+        |--------------------------------------------------------------------------
+        */
+
+        if (data?.aiMessage) {
+
+          setMessages((prev) => [
+
+            ...prev,
+
+            {
+
+              id:
+                data.aiMessage._id ||
+                Date.now() + 1,
+
+              role:
+                data.aiMessage.role ||
+                'ai',
+
+              content:
+                data.aiMessage.content ||
+                ''
+
+            }
+
+          ]);
+
+        }
+
+      }
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | EXISTING CHAT
+      |--------------------------------------------------------------------------
+      */
+
+      else if (chatIdAtStart) {
+
+        if (data?.aiMessage) {
+
+          setMessages((prev) => [
+
+            ...prev,
+
+            {
+
+              id:
+                data.aiMessage._id ||
+                Date.now() + 1,
+
+              role:
+                data.aiMessage.role ||
+                'ai',
+
+              content:
+                data.aiMessage.content ||
+                ''
+
+            }
+
+          ]);
+
+        }
+
+      }
+
+    }
+    catch (error) {
+
+      console.error(
+        'Error while sending message:',
+        error
+      );
+
+    }
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | OPEN DELETE CONFIRMATION
+  |--------------------------------------------------------------------------
+  */
+
+  const handleDeleteChat = (
+    e,
+    chatId
+  ) => {
+
+    e.stopPropagation();
+
+
+    /*
+     * Don't delete immediately.
+     *
+     * Just remember which chat user wants
+     * to delete and open confirmation popup.
+     */
+
+    setDeleteChatId(chatId);
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | CONFIRM DELETE CHAT
+  |--------------------------------------------------------------------------
+  */
+
+  const confirmDeleteChat = async () => {
+
+    if (!deleteChatId) {
+      return;
+    }
+
+
+    try {
+
+      await deletChat(deleteChatId);
+
+
+      /*
+       * Remove chat from Redux.
+       */
+
+      dispatch(
+        deleteChatFromStore(deleteChatId)
+      );
+
+
+      /*
+       * If currently selected chat was deleted,
+       * clear its messages.
+       */
+
+      if (
+        currentChatId === deleteChatId
+      ) {
+
+        setMessages([]);
+
+      }
+
+
+      /*
+       * Close confirmation popup.
+       */
+
+      setDeleteChatId(null);
+
+    }
+    catch (error) {
+
+      dispatch(
+        setError(
+          error.response?.data?.message ||
+          "Something went wrong while deleting chat"
+        )
+      );
+
+    }
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | CANCEL DELETE
+  |--------------------------------------------------------------------------
+  */
+
+  const cancelDeleteChat = () => {
+
+    setDeleteChatId(null);
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | ENTER KEY SEND
+  |--------------------------------------------------------------------------
+  */
+
+  const handleKeyDown = (e) => {
+
+    if (
+      e.key === 'Enter' &&
+      !e.shiftKey
+    ) {
+
       e.preventDefault();
 
-      const trimmedMessage = message.trim();
-      if (!trimmedMessage) return;
+      handleSend(e);
 
-      chat.handleSendMessages({message: trimmedMessage, chatId: currentChatId});
     }
+
+  };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | EMPTY CHAT CHECK
+  |--------------------------------------------------------------------------
+  */
+
+  const isEmptyChat =
+    !currentChatId &&
+    messages.length === 0;
+
 
   return (
     <div className="h-screen w-full bg-[#090d17] overflow-hidden select-none">
 
       {/* Main Qevro Container */}
+
       <div className="relative h-full w-full overflow-hidden bg-gray-950">
 
         {/* Background Aura */}
+
         <div
           className="
             absolute -top-52 -left-52
@@ -96,10 +604,14 @@ const Dashboard = () => {
           "
         />
 
+
         {/* Main Layout */}
+
         <div className="relative flex h-full">
 
+
           {/* SIDEBAR */}
+
           <aside
             className={`
               shrink-0 h-full
@@ -132,6 +644,7 @@ const Dashboard = () => {
             <div
               className={`
                 h-full flex flex-col p-4
+
                 ${
                   sidebarOpen
                     ? 'opacity-100'
@@ -140,10 +653,13 @@ const Dashboard = () => {
               `}
             >
 
+
               {/* Sidebar Header */}
+
               <div className="flex items-center justify-between mb-8">
 
                 {/* Logo */}
+
                 <h1
                   className="
                     text-2xl
@@ -156,10 +672,14 @@ const Dashboard = () => {
                   Qevro<span className="text-indigo-400">Ai.</span>
                 </h1>
 
+
                 {/* Collapse */}
+
                 <button
                   type="button"
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={() =>
+                    setSidebarOpen(false)
+                  }
                   className="
                     w-10 h-10 shrink-0
                     rounded-lg
@@ -179,7 +699,34 @@ const Dashboard = () => {
               </div>
 
 
+              {/* NEW CHAT */}
+
+              <button
+                type="button"
+                onClick={handleNewChat}
+                className="
+                  w-full
+                  h-12
+                  mb-4
+                  px-4
+                  rounded-xl
+                  border border-gray-700/80
+                  bg-gray-800/50
+                  text-gray-300
+                  flex items-center justify-center
+                  cursor-pointer
+                  hover:bg-gray-800
+                  hover:border-gray-600
+                  hover:text-white
+                  transition-all duration-200
+                "
+              >
+                + New Chat
+              </button>
+
+
               {/* Chat Titles */}
+
               <div
                 className="
                   flex-1
@@ -191,56 +738,70 @@ const Dashboard = () => {
 
                 <div className="space-y-3">
 
-                  {chats[currentChatId]?.messages.map((message) => (
+                  {Object.values(chats).map(
+                    (chatItem) => (
 
-                    <div
-                      key={message.id}
-                      className="
-                        group
-                        w-full
-                        h-12
-                        px-4
-                        rounded-xl
-                        border border-gray-700/80
-                        bg-gray-800/50
-                        flex items-center justify-between
-                        cursor-pointer
-                        hover:bg-gray-800
-                        hover:border-gray-600
-                        transition-all duration-200
-                      "
-                    >
-
-                      <span
+                      <div
+                        key={chatItem.id}
+                        onClick={() =>
+                          handleSelectChat(
+                            chatItem.id
+                          )
+                        }
                         className="
-                          text-sm
-                          text-gray-300
-                          truncate
-                        "
-                      >
-                        {chat}
-                      </span>
-
-                      {/* Delete */}
-                      <button
-                        type="button"
-                        onClick={() => deleteChat(index)}
-                        className="
-                          shrink-0
-                          ml-3
-                          text-gray-400/70
-                          hover:text-gray-300
+                          group
+                          w-full
+                          h-12
+                          px-4
+                          rounded-xl
+                          border border-gray-700/80
+                          bg-gray-800/50
+                          flex items-center justify-between
                           cursor-pointer
+                          hover:bg-gray-800
+                          hover:border-gray-600
                           transition-all duration-200
-                          hover:scale-110
                         "
                       >
-                        <Trash2 size={16} />
-                      </button>
 
-                    </div>
+                        <span
+                          className="
+                            text-sm
+                            text-gray-300
+                            truncate
+                          "
+                        >
+                          {chatItem.title}
+                        </span>
 
-                  ))}
+
+                        {/* Delete */}
+
+                        <button
+                          type="button"
+                          onClick={(e) =>
+                            handleDeleteChat(
+                              e,
+                              chatItem.id
+                            )
+                          }
+                          className="
+                            shrink-0
+                            ml-3
+                            text-gray-400/70
+                            hover:text-gray-300
+                            cursor-pointer
+                            transition-all duration-200
+                            hover:scale-110
+                          "
+                        >
+                          <Trash2 size={16} />
+                        </button>
+
+                      </div>
+
+                    )
+                  ).reverse()}
 
                 </div>
 
@@ -248,6 +809,7 @@ const Dashboard = () => {
 
 
               {/* Sidebar Bottom */}
+
               <div
                 className="
                   pt-4
@@ -257,6 +819,7 @@ const Dashboard = () => {
               >
 
                 {/* Logout */}
+
                 <button
                   type="button"
                   className="
@@ -276,6 +839,7 @@ const Dashboard = () => {
 
 
                 {/* User Icon */}
+
                 <button
                   type="button"
                   className="
@@ -301,9 +865,12 @@ const Dashboard = () => {
 
 
           {/* MOBILE SIDEBAR OVERLAY */}
+
           {sidebarOpen && (
             <div
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
               className="
                 fixed
                 inset-0
@@ -316,10 +883,13 @@ const Dashboard = () => {
 
 
           {/* DESKTOP SIDEBAR OPEN BUTTON */}
+
           {!sidebarOpen && (
             <button
               type="button"
-              onClick={() => setSidebarOpen(true)}
+              onClick={() =>
+                setSidebarOpen(true)
+              }
               className="
                 hidden
                 lg:flex
@@ -345,9 +915,12 @@ const Dashboard = () => {
 
 
           {/* CHAT AREA */}
+
           <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-black/30">
 
+
             {/* MOBILE TOP BAR */}
+
             <div
               className="
                 lg:hidden
@@ -364,7 +937,9 @@ const Dashboard = () => {
               {!sidebarOpen && (
                 <button
                   type="button"
-                  onClick={() => setSidebarOpen(true)}
+                  onClick={() =>
+                    setSidebarOpen(true)
+                  }
                   className="
                     relative
                     z-50
@@ -387,13 +962,16 @@ const Dashboard = () => {
             </div>
 
 
-            {/* Messages Area */}
+            {/* MESSAGES AREA */}
+
             <div
               className="
                 relative
                 flex-1
                 min-h-0
                 overflow-y-auto
+                [scrollbar-width:none]
+                [&::-webkit-scrollbar]:hidden
                 px-4
                 py-6
                 sm:px-6
@@ -403,123 +981,240 @@ const Dashboard = () => {
               "
             >
 
-              <div
-                className="
-                  relative
-                  max-w-5xl
-                  mx-auto
-                  space-y-3
-                "
-              >
+              {/* EMPTY NEW CHAT */}
 
-                {/* User Message */}
-                <div className="flex justify-end">
+              {isEmptyChat ? (
 
-                  <div
+                <div
+                  className="
+                    h-full
+                    flex
+                    flex-col
+                    items-center
+                    justify-center
+                    text-center
+                  "
+                >
+
+                  <BotMessageSquare
+                    size={42}
+                    strokeWidth={1.8}
                     className="
-                      max-w-[88%]
-                      sm:max-w-[75%]
-                      lg:max-w-[70%]
-                      px-5 py-4
-                      rounded-2xl
-                      border border-indigo-400/30
-                      bg-indigo-500
-                      text-white
-                      text-sm
-                      leading-6
-                      shadow-lg
-                      break-words
+                      text-indigo-400
+                      mb-5
+                    "
+                  />
+
+                  <h2
+                    className="
+                      text-2xl
+                      sm:text-3xl
+                      font-semibold
+                      text-gray-200
+                      tracking-tight
                     "
                   >
-                    Can you explain how Redis caching works
-                    and when I should use it in my backend?
-                  </div>
+                    Welcome to Qevro-Ai
+                  </h2>
+
+                  <p
+                    className="
+                      mt-2
+                      text-sm
+                      text-gray-500
+                    "
+                  >
+                    Ask anything and start a new conversation.
+                  </p>
 
                 </div>
 
+              ) : (
 
-                {/* AI Response */}
-                <div className="flex justify-start">
+                <div
+                  className="
+                    relative
+                    max-w-5xl
+                    mx-auto
+                    space-y-1
+                  "
+                >
 
-                  <div
-                    className="
-                      w-full
-                      min-h-[300px]
-                      rounded-3xl
-                      border-0
-                      lg:border
-                      border-gray-800
-                      bg-black/80
-                      shadow-2xl
-                      px-5 py-6
-                      sm:px-8
-                      sm:py-8
-                    "
-                  >
+                  {/* MESSAGES */}
 
-                    <p
+                  {messages.map((item) => (
+
+                    <div
+                      key={item.id}
+                      className={
+                        item.role === 'user'
+                          ? 'flex justify-end'
+                          : 'flex justify-start'
+                      }
+                    >
+
+                      {item.role === 'user' ? (
+
+                        /* USER MESSAGE */
+
+                        <div
+                          className="
+                            max-w-[88%]
+                            sm:max-w-[75%]
+                            lg:max-w-[70%]
+                            px-5 py-4
+                            rounded-2xl
+                            border border-indigo-400/30
+                            bg-indigo-500
+                            text-white
+                            text-sm
+                            leading-6
+                            shadow-lg
+                            break-words
+                          "
+                        >
+                          {item.content}
+                        </div>
+
+                      ) : (
+
+                        /* AI RESPONSE */
+
+                        <div
+                          className="
+                            w-full
+                            rounded-3xl
+                            border-0
+                            lg:border
+                            border-gray-800
+                            bg-black/80
+                            shadow-2xl
+                            px-5 py-6
+                            sm:px-8
+                            sm:py-8
+                          "
+                        >
+
+                          <p
+                            className="
+                              text-gray-300
+                              text-sm
+                              leading-7
+                            "
+                          >
+                            {item.content}
+                          </p>
+
+                        </div>
+
+                      )}
+
+                    </div>
+
+                  ))}
+
+
+                  {/* AI THINKING PLACEHOLDER */}
+
+                  {loading && (
+
+                    <div
                       className="
-                        text-gray-300
-                        text-sm
-                        leading-7
+                        flex
+                        justify-start
                       "
                     >
-                      Redis is an in-memory data store that is commonly
-                      used as a cache between your application and database.
-                      Instead of querying the database every time, your
-                      server can temporarily store frequently requested data
-                      in Redis.
-                    </p>
 
-                    <p
-                      className="
-                        mt-4
-                        text-gray-400
-                        text-sm
-                        leading-7
-                      "
-                    >
-                      This is useful when the same data is requested often
-                      because reading from memory is usually much faster
-                      than making another database query.
-                    </p>
+                      <div
+                        className="
+                          w-full
+                          rounded-3xl
+                          border-0
+                          lg:border
+                          border-gray-800
+                          bg-black/80
+                          shadow-2xl
+                          px-5 py-6
+                          sm:px-8
+                          sm:py-8
+                        "
+                      >
 
-                  </div>
+                        <div
+                          className="
+                            flex
+                            items-center
+                            gap-3
+                            text-gray-400
+                          "
+                        >
 
-                </div>
+                          <BotMessageSquare
+                            size={19}
+                            className="text-indigo-400"
+                          />
+
+                          <span className="text-sm">
+                            Qevro-Ai is thinking...
+                          </span>
+
+                          <span
+                            className="
+                              flex
+                              gap-1
+                              ml-1
+                            "
+                          >
+
+                            <span className="animate-bounce">
+                              .
+                            </span>
+
+                            <span
+                              className="
+                                animate-bounce
+                                [animation-delay:150ms]
+                              "
+                            >
+                              .
+                            </span>
+
+                            <span
+                              className="
+                                animate-bounce
+                                [animation-delay:300ms]
+                              "
+                            >
+                              .
+                            </span>
+
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  )}
 
 
-                {/* Second User Message */}
-                <div className="flex justify-end">
+                  {/* AUTO SCROLL TARGET */}
 
                   <div
-                    className="
-                      max-w-[88%]
-                      sm:max-w-[75%]
-                      lg:max-w-[70%]
-                      px-5 py-4
-                      rounded-2xl
-                      border border-indigo-400/30
-                      bg-indigo-500
-                      text-white
-                      text-sm
-                      leading-6
-                      shadow-lg
-                      break-words
-                    "
-                  >
-                    So basically Redis reduces the number of
-                    database queries?
-                  </div>
+                    ref={messagesEndRef}
+                    className="h-px w-full"
+                  />
 
                 </div>
 
-              </div>
+              )}
 
             </div>
 
 
             {/* INPUT */}
+
             <div
               className="
                 shrink-0
@@ -558,7 +1253,10 @@ const Dashboard = () => {
 
                   <textarea
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) =>
+                      setMessage(e.target.value)
+                    }
+                    onKeyDown={handleKeyDown}
                     placeholder="Ask anything"
                     rows={1}
                     className="
@@ -578,9 +1276,12 @@ const Dashboard = () => {
                     "
                   />
 
-                  {/* Send / Bot Button */}
+
+                  {/* SEND / BOT BUTTON */}
+
                   <button
                     type="submit"
+                    disabled={loading}
                     className="
                       absolute
                       right-3
@@ -598,11 +1299,20 @@ const Dashboard = () => {
                       active:scale-95
                     "
                   >
+
                     {message.trim() ? (
+
                       <Send size={18} />
+
                     ) : (
-                      <BotMessageSquare size={20} strokeWidth={2} />
+
+                      <BotMessageSquare
+                        size={20}
+                        strokeWidth={2}
+                      />
+
                     )}
+
                   </button>
 
                 </div>
@@ -615,10 +1325,136 @@ const Dashboard = () => {
 
         </div>
 
+
+        {/* ================================================================
+            DELETE CONFIRMATION MODAL
+        ================================================================= */}
+
+        {deleteChatId && (
+
+          <div
+            className="
+              fixed
+              inset-0
+              z-[100]
+              flex
+              items-center
+              justify-center
+              bg-black/70
+              backdrop-blur-sm
+              px-4
+            "
+          >
+
+            <div
+              className="
+                w-full
+                max-w-md
+                rounded-2xl
+                border border-gray-800
+                bg-black
+                shadow-2xl
+                p-6
+              "
+            >
+
+              {/* Modal Title */}
+
+              <h2
+                className="
+                  text-xl
+                  font-semibold
+                  text-white
+                "
+              >
+                Delete Chat?
+              </h2>
+
+
+              {/* Modal Message */}
+
+              <p
+                className="
+                  mt-3
+                  text-sm
+                  leading-6
+                  text-gray-400
+                "
+              >
+                Are you sure you want to delete this chat?
+                This action cannot be undone.
+              </p>
+
+
+              {/* Modal Buttons */}
+
+              <div
+                className="
+                  mt-6
+                  flex
+                  justify-end
+                  gap-3
+                "
+              >
+
+                {/* Cancel */}
+
+                <button
+                  type="button"
+                  onClick={cancelDeleteChat}
+                  className="
+                    px-5
+                    h-10
+                    rounded-lg
+                    border
+                    border-white
+                    bg-black
+                    text-white
+                    text-sm
+                    font-medium
+                    cursor-pointer
+                    hover:bg-gray-900
+                    transition-all duration-200
+                  "
+                >
+                  Cancel
+                </button>
+
+
+                {/* Delete */}
+
+                <button
+                  type="button"
+                  onClick={confirmDeleteChat}
+                  className="
+                    px-5
+                    h-10
+                    rounded-lg
+                    bg-red-500
+                    text-white
+                    text-sm
+                    font-medium
+                    cursor-pointer
+                    hover:bg-red-400
+                    transition-all duration-200
+                  "
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
+
       </div>
 
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+
+export default Dashboard;

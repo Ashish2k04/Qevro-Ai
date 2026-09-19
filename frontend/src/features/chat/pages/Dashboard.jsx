@@ -1,33 +1,13 @@
 import { useSelector, useDispatch } from 'react-redux';
-import {
-    useEffect,
-    useState,
-    useRef
-} from 'react';
-
+import { useEffect, useState, useRef } from 'react';
 import { useChat } from '../hooks/useChat.js';
-
-import {
-    setChats,
-    setcurrentChatId,
-    setError,
-    deleteChatFromStore
-} from '../chat.slice.js';
-
-import {
-    getChats,
-    getMessages,
-    deletChat
-} from '../services/chat.api.js';
-
+import { setChats, setcurrentChatId, setError, deleteChatFromStore } from '../chat.slice.js';
+import { getChats, getMessages, deletChat } from '../services/chat.api.js';
 import ChatSidebar from '../components/ChatSidebar.jsx';
 import ChatMessages from '../components/ChatMessages.jsx';
 import ChatInput from '../components/ChatInput.jsx';
 import DeleteChatModal from '../components/DeleteChatModal.jsx';
-
-import {
-    PanelLeftOpen
-} from 'lucide-react';
+import { PanelLeftOpen } from 'lucide-react';
 
 
 const Dashboard = () => {
@@ -36,12 +16,7 @@ const Dashboard = () => {
 
     const chat = useChat();
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | REDUX STATE
-    |--------------------------------------------------------------------------
-    */
+    // REDUX STATE
 
     const chats = useSelector(
         (state) => state.chat.chats
@@ -55,12 +30,7 @@ const Dashboard = () => {
         (state) => state.chat.loading
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | LOCAL STATE
-    |--------------------------------------------------------------------------
-    */
+    // LOCAL STATE
 
     const [sidebarOpen, setSidebarOpen] = useState(() => {
 
@@ -78,12 +48,7 @@ const Dashboard = () => {
 
     const [deleteChatId, setDeleteChatId] = useState(null);
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | AUTO SCROLL
-    |--------------------------------------------------------------------------
-    */
+    //AUTO SCROLL
 
     const messagesEndRef = useRef(null);
 
@@ -97,12 +62,7 @@ const Dashboard = () => {
 
     }, [messages, loading]);
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | SOCKET CONNECTION
-    |--------------------------------------------------------------------------
-    */
+    //SOCKET CONNECTION
 
     useEffect(() => {
 
@@ -110,12 +70,7 @@ const Dashboard = () => {
 
     }, []);
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | GET ALL CHATS
-    |--------------------------------------------------------------------------
-    */
+    // GET ALL CHATS
 
     useEffect(() => {
 
@@ -188,12 +143,7 @@ const Dashboard = () => {
 
     }, [dispatch]);
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | SELECT CHAT
-    |--------------------------------------------------------------------------
-    */
+    //SELECT CHAT
 
     const handleSelectChat = async (
         chatId
@@ -246,12 +196,7 @@ const Dashboard = () => {
 
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | NEW CHAT
-    |--------------------------------------------------------------------------
-    */
+    //  NEW CHAT
 
     const handleNewChat = () => {
 
@@ -264,42 +209,23 @@ const Dashboard = () => {
 
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | SEND MESSAGE
-    |--------------------------------------------------------------------------
-    */
+    // SEND MESSAGE
 
     const handleSend = async (e) => {
 
         e.preventDefault();
 
-
-        const trimmedMessage =
-            message.trim();
-
+        const trimmedMessage = message.trim();
 
         if (!trimmedMessage) {
             return;
         }
 
+        // SAVE CURRENT CHAT ID
+        
+        const chatIdAtStart = currentChatId;
 
-        /*
-        |--------------------------------------------------------------------------
-        | SAVE CURRENT CHAT ID
-        |--------------------------------------------------------------------------
-        */
-
-        const chatIdAtStart =
-            currentChatId;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SHOW USER MESSAGE IMMEDIATELY
-        |--------------------------------------------------------------------------
-        */
+        // SHOW USER MESSAGE IMMEDIATELY
 
         const temporaryUserMessage = {
 
@@ -327,12 +253,7 @@ const Dashboard = () => {
 
 
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | SEND API REQUEST
-            |--------------------------------------------------------------------------
-            */
+            //SEND API REQUEST
 
             const data =
                 await chat.handleSendMessages({
@@ -343,12 +264,7 @@ const Dashboard = () => {
 
                 });
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | NEW CHAT
-            |--------------------------------------------------------------------------
-            */
+            //  NEW CHAT
 
             if (
                 !chatIdAtStart &&
@@ -365,12 +281,7 @@ const Dashboard = () => {
                     )
                 );
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | AI RESPONSE
-                |--------------------------------------------------------------------------
-                */
+                // AI RESPONSE
 
                 if (data?.aiMessage) {
 
@@ -402,12 +313,7 @@ const Dashboard = () => {
 
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | EXISTING CHAT
-            |--------------------------------------------------------------------------
-            */
+            // EXISTING CHAT
 
             else if (chatIdAtStart) {
 
@@ -453,12 +359,7 @@ const Dashboard = () => {
 
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | OPEN DELETE CONFIRMATION
-    |--------------------------------------------------------------------------
-    */
+    // OPEN DELETE CONFIRMATION
 
     const handleDeleteChat = (
         e,
@@ -471,12 +372,7 @@ const Dashboard = () => {
 
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONFIRM DELETE CHAT
-    |--------------------------------------------------------------------------
-    */
+    //  CONFIRM DELETE CHAT
 
     const confirmDeleteChat = async () => {
 
@@ -491,12 +387,7 @@ const Dashboard = () => {
                 deleteChatId
             );
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | REMOVE FROM REDUX
-            |--------------------------------------------------------------------------
-            */
+            // REMOVE FROM REDUX
 
             dispatch(
                 deleteChatFromStore(
@@ -504,12 +395,7 @@ const Dashboard = () => {
                 )
             );
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | IF CURRENT CHAT WAS DELETED
-            |--------------------------------------------------------------------------
-            */
+            // IF CURRENT CHAT WAS DELETED
 
             if (
                 currentChatId === deleteChatId
@@ -523,12 +409,7 @@ const Dashboard = () => {
 
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | CLOSE MODAL
-            |--------------------------------------------------------------------------
-            */
+            // CLOSE MODAL
 
             setDeleteChatId(null);
 
@@ -546,12 +427,7 @@ const Dashboard = () => {
 
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | CANCEL DELETE
-    |--------------------------------------------------------------------------
-    */
+    // CANCEL DELETE
 
     const cancelDeleteChat = () => {
 
@@ -559,12 +435,7 @@ const Dashboard = () => {
 
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | ENTER KEY SEND
-    |--------------------------------------------------------------------------
-    */
+    // ENTER KEY SEND
 
     const handleKeyDown = (e) => {
 
@@ -581,13 +452,8 @@ const Dashboard = () => {
 
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | EMPTY CHAT CHECK
-    |--------------------------------------------------------------------------
-    */
-
+    // EMPTY CHAT CHECK
+    
     const isEmptyChat =
         !currentChatId &&
         messages.length === 0;

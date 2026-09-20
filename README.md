@@ -273,7 +273,7 @@ The backend currently uses:
 - `langchain` — Building AI applications
 - `@langchain/google-genai` — Google Gemini integration
 - `@langchain/groq` — Groq LLM integration
-- `@langchain/tavily` — Web search integration for AI
+- `@tavily/core` — Web search integration for AI
 - `cookie-parser` — Handling cookies
 - `morgan` — HTTP request logging
 - `cors` — Cross-Origin Resource Sharing

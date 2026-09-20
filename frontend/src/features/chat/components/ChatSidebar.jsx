@@ -1,4 +1,4 @@
-import { PanelLeftOpen, PanelRightOpen, Trash2, UserRound, LogOut } from 'lucide-react';
+import { PanelLeftOpen, PanelRightOpen, Trash2, LogOut } from 'lucide-react';
 
 const ChatSidebar = ({
     chats,
@@ -6,8 +6,11 @@ const ChatSidebar = ({
     setSidebarOpen,
     handleNewChat,
     handleSelectChat,
-    handleDeleteChat
+    handleDeleteChat,
+    username
 }) => {
+    const userInitial = username?.trim()?.charAt(0)?.toUpperCase() || 'U';
+
     return (
         <>
             <aside className={`shrink-0 h-full border-r border-gray-800/80 bg-gray-900/60 backdrop-blur-xl transition-all duration-300 ease-in-out lg:relative lg:z-auto ${sidebarOpen ? 'w-[290px] fixed inset-y-0 left-0 z-50 lg:relative lg:w-[290px]' : 'w-0 fixed inset-y-0 left-0 z-40 border-r-0 bg-transparent lg:relative lg:w-0'}`}>
@@ -17,12 +20,20 @@ const ChatSidebar = ({
                             Qevro<span className="text-indigo-400">Ai.</span>
                         </h1>
 
-                        <button type="button" onClick={() => setSidebarOpen(false)} className="w-10 h-10 shrink-0 rounded-lg border border-gray-700 bg-gray-800/80 text-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-700 hover:text-white transition-all duration-200">
+                        <button
+                            type="button"
+                            onClick={() => setSidebarOpen(false)}
+                            className="w-10 h-10 shrink-0 rounded-lg border border-gray-700 bg-gray-800/80 text-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-700 hover:text-white transition-all duration-200"
+                        >
                             <PanelRightOpen size={19} />
                         </button>
                     </div>
 
-                    <button type="button" onClick={handleNewChat} className="w-full h-12 mb-4 px-4 rounded-xl border border-gray-700/80 bg-gray-800/50 text-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-800 hover:border-gray-600 hover:text-white transition-all duration-200">
+                    <button
+                        type="button"
+                        onClick={handleNewChat}
+                        className="w-full h-12 mb-4 px-4 rounded-xl border border-gray-700/80 bg-gray-800/50 text-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-800 hover:border-gray-600 hover:text-white transition-all duration-200"
+                    >
                         + New Chat
                     </button>
 
@@ -51,19 +62,30 @@ const ChatSidebar = ({
                     </div>
 
                     <div className="pt-4 border-t border-gray-800 flex items-center justify-between">
-                        <button type="button" className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center cursor-pointer hover:bg-red-400 hover:scale-105 transition-all duration-200">
+                        <button
+                            type="button"
+                            className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center cursor-pointer hover:bg-red-400 hover:scale-105 transition-all duration-200"
+                        >
                             <LogOut size={19} />
                         </button>
 
-                        <button type="button" className="w-10 h-10 rounded-full bg-white text-gray-900 flex items-center justify-center cursor-pointer hover:bg-indigo-100 hover:scale-105 transition-all duration-200">
-                            <UserRound size={19} />
+                        <button
+                            type="button"
+                            className="w-10 h-10 rounded-full bg-white text-gray-900 flex items-center justify-center cursor-pointer hover:bg-indigo-100 hover:scale-105 transition-all duration-200"
+                        >
+                            <span className="text-sm font-semibold">
+                                {userInitial}
+                            </span>
                         </button>
                     </div>
                 </div>
             </aside>
 
             {sidebarOpen && (
-                <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />
+                <div
+                    onClick={() => setSidebarOpen(false)}
+                    className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+                />
             )}
 
             {!sidebarOpen && (

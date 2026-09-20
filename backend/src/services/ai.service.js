@@ -5,7 +5,6 @@ import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages
 import {createAgent, modelFallbackMiddleware} from 'langchain';
 import {TavilySearch} from '@langchain/tavily';
 
-
 const gemini = new ChatGoogleGenerativeAI({
     model: "gemini-3.5-flash-lite",
     temperature: 0,

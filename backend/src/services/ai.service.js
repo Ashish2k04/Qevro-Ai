@@ -3,6 +3,7 @@ import {ChatGoogleGenerativeAI} from '@langchain/google-genai';
 import { ChatGroq } from "@langchain/groq";
 import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 import {createAgent, modelFallbackMiddleware, tool} from 'langchain';
+import { searchInternet } from './internet.service.js';
 import * as z from "zod";
 
 const gemini = new ChatGoogleGenerativeAI({
@@ -17,7 +18,9 @@ const groq = new ChatGroq({
     maxRetries: 0
 });
 
-const webSearchTool = tool({
+const searchInternetTool = tool(
+    searchInternet,
+    {
     name: "SearchInternet",
     description: "Use this tool to search the latest and friquent answers on the internet.",
     schema: z.object({
@@ -27,7 +30,7 @@ const webSearchTool = tool({
 
 const agent = createAgent({
     model: gemini,
-    tools: [webSearchTool],
+    tools: [searchInternetTool],
     middleware: [modelFallbackMiddleware(groq)]
 })
 

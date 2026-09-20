@@ -6,7 +6,7 @@ let tavily = new Tavily({
     topic: "general",
 })
 
-export const searchInternet = async (query) => {
+export const searchInternetWithTavily = async (query) => {
     return await tavily.search(query, {
         maxResults: 5,
         searchDepth: "advanced"

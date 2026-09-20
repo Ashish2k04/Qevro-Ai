@@ -2,8 +2,8 @@ import 'dotenv/config'
 import {ChatGoogleGenerativeAI} from '@langchain/google-genai';
 import { ChatGroq } from "@langchain/groq";
 import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
-import {createAgent, modelFallbackMiddleware} from 'langchain';
-import { webSearchTool } from './internet.service.js';
+import {createAgent, modelFallbackMiddleware, tool} from 'langchain';
+import * as z from "zod";
 
 const gemini = new ChatGoogleGenerativeAI({
     model: "gemini-3.5-flash-lite",
@@ -16,6 +16,14 @@ const groq = new ChatGroq({
     temperature: 0,
     maxRetries: 0
 });
+
+const webSearchTool = tool({
+    name: "SearchInternet",
+    description: "Use this tool to search the latest and friquent answers on the internet.",
+    schema: z.object({
+        query: z.string().describe("The search query to look up the internet.")
+    })
+})
 
 const agent = createAgent({
     model: gemini,

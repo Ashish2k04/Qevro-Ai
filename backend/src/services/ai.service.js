@@ -3,7 +3,7 @@ import {ChatGoogleGenerativeAI} from '@langchain/google-genai';
 import { ChatGroq } from "@langchain/groq";
 import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 import {createAgent, modelFallbackMiddleware} from 'langchain';
-import {TavilySearch} from '@langchain/tavily';
+import { webSearchTool } from './internet.service.js';
 
 const gemini = new ChatGoogleGenerativeAI({
     model: "gemini-3.5-flash-lite",
@@ -16,11 +16,6 @@ const groq = new ChatGroq({
     temperature: 0,
     maxRetries: 0
 });
-
-const webSearchTool = new TavilySearch({
-     maxResults: 5,
-     topic: "general",
-})
 
 const agent = createAgent({
     model: gemini,

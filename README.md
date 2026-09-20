@@ -256,6 +256,9 @@ The frontend currently uses:
 - `axios` — Making API requests
 - `socket.io-client` — Real-time communication
 - `tailwindcss` — Utility-first CSS framework for styling
+- `lucide-react` — Icons
+- `react-markdown` — Rendering Markdown content in React
+- `remark-gfm` — GitHub Flavored Markdown support
 
 ---
 

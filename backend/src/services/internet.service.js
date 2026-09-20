@@ -1,7 +1,15 @@
 import 'dotenv/config';
-import { TavilySearch } from "@langchain/tavily";
+import {tavily as Tavily} from '@tavily/core'
 
-export const webSearchTool = new TavilySearch({
+let tavily = new Tavily({
     maxResults: 5,
     topic: "general",
 })
+
+export const searchInternet = async (query) => {
+    return await tavily.search(query, {
+        maxResults: 5,
+        searchDepth: "advanced"
+    })
+}
+

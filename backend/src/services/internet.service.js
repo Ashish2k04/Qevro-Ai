@@ -2,14 +2,20 @@ import 'dotenv/config';
 import {tavily as Tavily} from '@tavily/core'
 
 let tavily = new Tavily({
-    maxResults: 5,
-    topic: "general",
+    apiKey: process.env.TAVILY_API_KEY
 })
 
-export const searchInternetWithTavily = async (query) => {
-    return await tavily.search(query, {
-        maxResults: 5,
-        searchDepth: "advanced"
-    })
+export const searchInternetWithTavily = async ({query}) => {
+    try{
+        const result = await tavily.search(query, {
+              maxResults: 5,
+              searchDepth: "advanced"
+        })
+        return result
+    }
+    catch(err){
+        console.log("Something went wrong in tavily", err);
+        throw err;
+    }
 }
 

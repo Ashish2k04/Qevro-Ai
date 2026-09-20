@@ -19,7 +19,7 @@ const groq = new ChatGroq({
 });
 
 const searchInternetTool = tool(
-    searchInternet,
+    searchInternetWithTavily,
     {
     name: "SearchInternet",
     description: "Use this tool to search the latest and friquent answers on the internet.",

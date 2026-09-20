@@ -3,7 +3,7 @@ import {ChatGoogleGenerativeAI} from '@langchain/google-genai';
 import { ChatGroq } from "@langchain/groq";
 import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 import {createAgent, modelFallbackMiddleware, tool} from 'langchain';
-import { searchInternet } from './internet.service.js';
+import { searchInternetWithTavily } from './internet.service.js';
 import * as z from "zod";
 
 const gemini = new ChatGoogleGenerativeAI({

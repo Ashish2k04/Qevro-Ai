@@ -125,17 +125,17 @@ const ChatMessages = ({ messages, loading, isEmptyChat, messagesEndRef }) => {
                     {loading && (
                         <div className="flex justify-start">
                             <div className="w-full rounded-3xl border-0 lg:border border-gray-800 bg-black/80 shadow-2xl px-5 py-6 sm:px-8 sm:py-8">
-                                <div className="flex items-center gap-3 text-gray-400">
+                                <div className="flex items-center text-gray-400">
                                     <BotMessageSquare
                                         size={19}
-                                        className="text-indigo-400"
+                                        className="text-indigo-400 mr-3"
                                     />
 
                                     <span className="text-sm">
-                                        Qevro-Ai is thinking...
+                                        Qevro-Ai is thinking
                                     </span>
 
-                                    <span className="flex gap-1 ml-1">
+                                    <span className="flex ml-1">
                                         <span className="animate-bounce">
                                             .
                                         </span>

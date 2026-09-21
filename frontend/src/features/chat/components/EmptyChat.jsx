@@ -1,9 +1,9 @@
-import { BotMessageSquare } from 'lucide-react';
+import { BotMessageSquare, BadgeQuestionMark } from 'lucide-react';
 
 const EmptyChat = () => {
     return (
         <div className="h-full flex flex-col items-center justify-center text-center">
-            <BotMessageSquare size={42} strokeWidth={1.8} className="text-indigo-400 mb-5" />
+            <BadgeQuestionMark size={42} strokeWidth={1.8} className="text-indigo-400 mb-5" />
 
             <h2 className="text-2xl sm:text-3xl font-semibold text-gray-200 tracking-tight">
                 Welcome to Qevro-Ai

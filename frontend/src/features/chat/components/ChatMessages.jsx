@@ -17,45 +17,86 @@ const ChatMessages = ({ messages, loading, isEmptyChat, messagesEndRef }) => {
                                     {item.content}
                                 </div>
                             ) : (
-                                <div className="w-full rounded-3xl border-0 lg:border border-gray-800 bg-black/80 shadow-2xl px-5 py-6 sm:px-8 sm:py-8">
-                                    <ReactMarkdown
-                                        remarkPlugins={[remarkGfm]}
-                                        components={{
-                                            p: ({ children }) => (
-                                                <p className="text-gray-300 text-sm leading-7 mb-3 last:mb-0">
-                                                    {children}
-                                                </p>
-                                            ),
-                                            strong: ({ children }) => (
-                                                <strong className="font-semibold text-white">
-                                                    {children}
-                                                </strong>
-                                            ),
-                                            em: ({ children }) => (
-                                                <em className="italic text-gray-200">
-                                                    {children}
-                                                </em>
-                                            ),
-                                            ul: ({ children }) => (
-                                                <ul className="list-disc ml-5 mb-3 space-y-1 text-gray-300 text-sm leading-7">
-                                                    {children}
-                                                </ul>
-                                            ),
-                                            ol: ({ children }) => (
-                                                <ol className="list-decimal ml-5 mb-3 space-y-1 text-gray-300 text-sm leading-7">
-                                                    {children}
-                                                </ol>
-                                            ),
-                                            code: ({ children }) => (
-                                                <code className="px-1.5 py-0.5 rounded bg-gray-800 text-indigo-300 text-sm">
-                                                    {children}
-                                                </code>
-                                            )
-                                        }}
-                                    >
-                                        {item.content}
-                                    </ReactMarkdown>
-                                </div>
+                               <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  components={{
+                                      p: ({ children }) => (
+                                           <p className="text-gray-300 text-sm leading-7 mb-3 last:mb-0">
+                                               {children}
+                                           </p>
+                                      ),
+
+                                       strong: ({ children }) => (
+                                          <strong className="font-semibold text-white">
+                                               {children}
+                                           </strong>
+                                      ),
+
+                                       em: ({ children }) => (
+                                          <em className="italic text-gray-200">
+                                               {children}
+                                           </em>
+                                       ),
+
+                                      ul: ({ children }) => (
+                                           <ul className="list-disc ml-5 mb-3 space-y-1 text-gray-300 text-sm leading-7">
+                                               {children}
+                                           </ul>
+                                       ),
+
+                                       ol: ({ children }) => (
+                                          <ol className="list-decimal ml-5 mb-3 space-y-1 text-gray-300 text-sm leading-7">
+                                               {children}
+                                          </ol>
+                                       ),
+
+                                      code: ({ children }) => (
+                                          <code className="px-1.5 py-0.5 rounded bg-gray-800 text-indigo-300 text-sm">
+                                              {children}
+                                          </code>
+                                      ),
+
+                                      table: ({ children }) => (
+                                          <div className="w-full overflow-x-auto my-5">
+                                              <table className="w-full border-collapse border border-white text-white text-sm">
+                                                   {children}
+                                              </table>
+                                          </div>
+                                      ),
+
+                                      thead: ({ children }) => (
+                                          <thead className="bg-gray-800 text-white">
+                                              {children}
+                                           </thead>
+                                      ),
+
+                                      tbody: ({ children }) => (
+                                           <tbody className="text-white">
+                                              {children}
+                                           </tbody>
+                                      ),
+
+                                       tr: ({ children }) => (
+                                           <tr className="border-b border-white">
+                                               {children}
+                                          </tr>
+                                      ),
+
+                                      th: ({ children }) => (
+                                          <th className="border border-white px-4 py-3 text-left font-semibold text-white">
+                                           {children}
+                                          </th>
+                                      ),
+
+                                       td: ({ children }) => (
+                                          <td className="border border-white px-4 py-3 text-white">
+                                              {children}
+                                           </td>
+                                      )
+                                   }}
+                                  >
+                                   {item.content}
+                 </ReactMarkdown>
                             )}
                         </div>
                     ))}

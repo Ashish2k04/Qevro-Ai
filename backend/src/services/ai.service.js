@@ -23,20 +23,21 @@ const searchInternetTool = tool(
     {
     name: "SearchInternet",
     description: `
-               Search the internet for accurate and current information.
+            Search the internet for accurate and current information.
 
-               Use this tool whenever the user asks about:
-               - latest or current information
-               - recent events
-               - today's information
-               - dates of recent events
-               - information that may have changed over time
+            Use this tool whenever the user asks about:
+              - latest or current information
+              - recent events
+              - today's information
+              - dates of recent events
+              - information that may have changed over time
 
-               IMPORTANT:
-               Create the search query from the user's actual question.
-               Do not assume or add an old year, date, location, person, or other constraint that the user did not mention.
-               For questions containing words like "latest", "current", "last", or "recent", search for the most recent relevant information.
-             `,
+            IMPORTANT:
+              - Create the query directly from the user's question.
+              - Preserve explicit dates, years, names, and locations.
+              - Never remove a date or year mentioned by the user.
+              - For "latest", "current", "today", or "recent", search for the newest relevant information.
+          `,
     schema: z.object({
         query: z.string().describe("The search query to look up the internet.")
     })

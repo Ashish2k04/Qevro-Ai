@@ -1,4 +1,4 @@
-import { Send, BotMessageSquare } from 'lucide-react';
+import { PhoneCall, Phone } from 'lucide-react';
 
 const ChatInput = ({ message, setMessage, handleSend, handleKeyDown, loading }) => {
     return (
@@ -20,7 +20,7 @@ const ChatInput = ({ message, setMessage, handleSend, handleKeyDown, loading }) 
                         disabled={loading}
                         className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-indigo-400 hover:scale-110 active:scale-95"
                     >
-                        {message.trim() ? <Send size={18} /> : <BotMessageSquare size={20} strokeWidth={2} />}
+                        {message.trim() ? <PhoneCall size={18} /> : <Phone size={20} strokeWidth={2} />}
                     </button>
                 </div>
             </form>

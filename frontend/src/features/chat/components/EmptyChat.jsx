@@ -1,4 +1,4 @@
-import { BotMessageSquare, BadgeQuestionMark } from 'lucide-react';
+import { BadgeQuestionMark } from 'lucide-react';
 
 const EmptyChat = () => {
     return (

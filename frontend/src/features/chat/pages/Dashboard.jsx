@@ -267,7 +267,7 @@ const Dashboard = () => {
         messages.length === 0;
 
     return (
-        <div className="h-screen w-full bg-[#090d17] overflow-hidden select-none">
+        <div className="h-screen w-full bg-[#090d17] overflow-hidden">
             <div className="relative h-full w-full overflow-hidden bg-gray-950">
                 <div className="absolute -top-52 -left-52 w-[650px] h-[650px] rounded-full bg-indigo-700/20 blur-[130px] pointer-events-none" />
 

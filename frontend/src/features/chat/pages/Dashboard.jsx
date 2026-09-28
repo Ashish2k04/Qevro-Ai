@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState, useRef } from 'react';
 import { useChat } from '../hooks/useChat.js';
+import { useAuth } from '../../auth/hook/useAuth.js';
 import { setChats, setcurrentChatId, setError, deleteChatFromStore } from '../chat.slice.js';
 import { getChats, getMessages, deletChat } from '../services/chat.api.js';
 import { getMe } from '../../auth/services/auth.api.js';
@@ -14,6 +15,7 @@ import { PanelLeftOpen } from 'lucide-react';
 const Dashboard = () => {
     const dispatch = useDispatch();
     const chat = useChat();
+    const auth = useAuth();
 
     // REDUX STATE
     const chats = useSelector((state) => state.chat.chats);
@@ -261,6 +263,10 @@ const Dashboard = () => {
         }
     };
 
+    const handleLogout = () => {
+        auth.handleLogOut()
+    }
+
     // EMPTY CHAT CHECK
     const isEmptyChat =
         !currentChatId &&
@@ -283,6 +289,7 @@ const Dashboard = () => {
                         handleNewChat={handleNewChat}
                         handleSelectChat={handleSelectChat}
                         handleDeleteChat={handleDeleteChat}
+                        handleLogoutChat={handleLogout}
                         username={user?.username}
                     />
 

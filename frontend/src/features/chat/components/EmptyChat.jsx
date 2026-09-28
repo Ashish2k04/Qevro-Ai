@@ -16,4 +16,4 @@ const EmptyChat = () => {
     );
 };
 
-export default EmptyChat;
+export default EmptyChat

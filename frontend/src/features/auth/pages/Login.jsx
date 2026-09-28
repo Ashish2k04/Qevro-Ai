@@ -23,7 +23,6 @@ const Login = () => {
       }
 
       const res = await handleLogin(payload)
-      console.log(res)
       navigation('/');
     }
 

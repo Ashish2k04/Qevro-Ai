@@ -250,6 +250,21 @@ async function resetPasswordController(req,res,next){
 
 }
 
+async function logOutController(req, res, next){
+    try{
+       res.clearCookie("token");
+
+       return res.status(200).json({
+        message: "User logout successfully.",
+        success: true
+       })
+    }
+    catch(err){
+        err.status = 500;
+        next(err)
+    }
+}
+
 
 export {registerCtrl, verifyEmail, loginCtrl, 
-        getMeController, resetPasswordController};
+        getMeController, resetPasswordController, logOutController};

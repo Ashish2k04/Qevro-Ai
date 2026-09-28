@@ -7,7 +7,7 @@ const authRouter = Router();
 
 authRouter.post('/register', Registervalidator, registerCtrl);
 authRouter.post('/login', Loginvalidator, loginCtrl);
-authRouter.post('/logout', logOutController);
+authRouter.post('/logout', tokenVerification, logOutController);
 authRouter.get('/verify-email', verifyEmail);
 authRouter.get('/get-me', tokenVerification, getMeController);
 authRouter.patch('/update-password', tokenVerification, resetPasswordController);

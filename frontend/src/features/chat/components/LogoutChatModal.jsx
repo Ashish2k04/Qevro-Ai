@@ -13,7 +13,7 @@ const LogoutChatModal = ({  }) => {
                 <div className="mt-6 flex justify-end gap-3">
                     <button
                         type="button"
-                        onClick={cancelDeleteChat}
+                        // onClick={cancelDeleteChat}
                         className="px-5 h-10 rounded-lg border border-white bg-black text-white text-sm font-medium cursor-pointer hover:bg-gray-900 transition-all duration-200"
                     >
                         Cancel
@@ -21,7 +21,7 @@ const LogoutChatModal = ({  }) => {
 
                     <button
                         type="button"
-                        onClick={confirmDeleteChat}
+                        // onClick={confirmDeleteChat}
                         className="px-5 h-10 rounded-lg bg-red-500 text-white text-sm font-medium cursor-pointer hover:bg-red-400 transition-all duration-200"
                     >
                         Logout

@@ -7,6 +7,7 @@ const ChatSidebar = ({
     handleNewChat,
     handleSelectChat,
     handleDeleteChat,
+    handleLogoutChat,
     username
 }) => {
     const userInitial = username?.trim()?.charAt(0)?.toUpperCase() || 'U';
@@ -65,6 +66,7 @@ const ChatSidebar = ({
                         <button
                             type="button"
                             className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center cursor-pointer hover:bg-red-400 hover:scale-105 transition-all duration-200"
+                            onClick={handleLogoutChat}
                         >
                             <LogOut size={19} />
                         </button>

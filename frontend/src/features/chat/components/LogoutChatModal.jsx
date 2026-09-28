@@ -4,7 +4,7 @@ const LogoutChatModal = ({  }) => {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
             <div className="w-full max-w-md rounded-2xl border border-gray-800 bg-black shadow-2xl p-6">
-                <h2 className="text-xl font-semibold text-white">Logout?</h2>
+                <h2 className="text-xl font-semibold text-white">Logout your account?</h2>
 
                 <p className="mt-3 text-sm leading-6 text-gray-400">
                     Are you sure you want to logout? 

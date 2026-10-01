@@ -1,17 +1,18 @@
+import "dotenv/config";
 import express from 'express';
 import authRouter from './routes/auth.route.js';
 import chatRouter from './routes/chats.route.js';
 import handleErrors from './middlewares/error.middleware.js';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import cors from 'cors'
+import cors from 'cors';
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URI,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }));

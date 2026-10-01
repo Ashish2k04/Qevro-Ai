@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
+import { register } from '../services/auth.api'
 
 const Register = () => {
 
@@ -8,6 +9,22 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = await register({
+        username: name,
+        email,
+        password
+      });
+
+      console.log(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] flex select-none">
@@ -52,7 +69,7 @@ const Register = () => {
           </div>
 
           {/* Register Form */}
-          <form className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Name */}
             <div>
@@ -72,7 +89,7 @@ const Register = () => {
                 placeholder:text-gray-400
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 value={name}
-                onChange={(val)=>{setName(val.target.value)}}
+                onChange={(val) => { setName(val.target.value) }}
               />
             </div>
 
@@ -94,7 +111,7 @@ const Register = () => {
                 placeholder:text-gray-400
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 value={email}
-                onChange={(val)=>{setEmail(val.target.value)}}
+                onChange={(val) => { setEmail(val.target.value) }}
               />
             </div>
 
@@ -118,7 +135,7 @@ const Register = () => {
                   placeholder:text-gray-400
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   value={password}
-                  onChange={(val)=>{setPassword(val.target.value)}}
+                  onChange={(val) => { setPassword(val.target.value) }}
                 />
 
                 <button
@@ -203,7 +220,6 @@ const Register = () => {
           bg-purple-600/20 rounded-full blur-3xl"
         />
 
-
         {/* Content */}
         <div className="relative text-center px-10 max-w-xl">
 
@@ -219,7 +235,6 @@ const Register = () => {
               is ready for you.
             </span>
           </h2>
-
 
           {/* Features */}
           <p

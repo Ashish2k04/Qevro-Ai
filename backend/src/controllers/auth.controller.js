@@ -54,7 +54,7 @@ async function registerCtrl(req,res,next) {
             <p>Thank you for registering at <strong>Qevro-Ai</strong>, We're exicted to have you on board! 🥳</p>
             <p>Please verify your email address by clicking the link below:</p>
 
-            <a href="http://localhost:3000/api/verify-email?token=${token}">
+            <a href="${process.env.BACKEND_URI}/api/verify-email?token=${token}">
                 Verify Email.
             </a>
 

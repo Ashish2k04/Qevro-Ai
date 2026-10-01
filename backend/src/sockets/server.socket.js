@@ -5,7 +5,7 @@ let io;
 export const intializeSocket = (httpServer) =>{
     io = new Server(httpServer, {
         cors: {
-            origin: "http://localhost:5173",
+            origin: "https://qevro-ai.vercel.app",
             credentials: true
         }
     });

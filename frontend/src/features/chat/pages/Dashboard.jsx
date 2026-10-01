@@ -334,6 +334,7 @@ const Dashboard = () => {
                             loading={loading}
                             isEmptyChat={isEmptyChat}
                             messagesEndRef={messagesEndRef}
+                            username={user?.username}
                         />
 
                         <ChatInput

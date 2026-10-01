@@ -123,7 +123,11 @@ async function loginCtrl(req,res,next){
 
         const token = jwt.sign({id: isUserExists._id}, process.env.JWT_SECRET, {expiresIn: "7d"});
 
-        res.cookie("token", token);
+        res.cookie("token", token, {
+           httpOnly: true,
+           secure: true,
+           sameSite: "none"
+        });
 
         return res.status(200).json({
             message: "Loggin Successful.",

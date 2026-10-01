@@ -38,6 +38,12 @@ const Dashboard = () => {
     const [deleteChatId, setDeleteChatId] = useState(null);
     const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
+    // RESET CHAT WHEN DASHBOARD LOADS
+    useEffect(() => {
+        dispatch(setcurrentChatId(null));
+        setMessages([]);
+    }, [dispatch]);
+
     // AUTO SCROLL
     const messagesEndRef = useRef(null);
 
@@ -289,6 +295,7 @@ const Dashboard = () => {
     return (
         <div className="h-screen w-full bg-[#090d17] overflow-hidden">
             <div className="relative h-full w-full overflow-hidden bg-gray-950">
+
                 <div className="absolute -top-52 -left-52 w-[650px] h-[650px] rounded-full bg-indigo-700/20 blur-[130px] pointer-events-none" />
 
                 <div className="absolute -bottom-52 left-[30%] w-[650px] h-[650px] rounded-full bg-purple-700/20 blur-[130px] pointer-events-none" />
@@ -296,6 +303,7 @@ const Dashboard = () => {
                 <div className="absolute -top-52 -right-52 w-[650px] h-[650px] rounded-full bg-indigo-700/15 blur-[130px] pointer-events-none" />
 
                 <div className="relative flex h-full">
+
                     <ChatSidebar
                         chats={chats}
                         sidebarOpen={sidebarOpen}
@@ -308,6 +316,7 @@ const Dashboard = () => {
                     />
 
                     <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-black/30">
+
                         <div className="lg:hidden relative h-16 shrink-0 flex items-center px-4 bg-[#05070b] border-b border-gray-800/60">
                             {!sidebarOpen && (
                                 <button
@@ -334,6 +343,7 @@ const Dashboard = () => {
                             handleKeyDown={handleKeyDown}
                             loading={loading}
                         />
+
                     </main>
                 </div>
 
@@ -348,6 +358,7 @@ const Dashboard = () => {
                     confirmLogout={confirmLogout}
                     cancelLogout={cancelLogout}
                 />
+
             </div>
         </div>
     );

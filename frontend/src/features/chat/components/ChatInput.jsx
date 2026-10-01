@@ -14,14 +14,26 @@ const ChatInput = ({ message, setMessage, handleSend, handleKeyDown, loading }) 
                         className="w-full min-h-[64px] resize-none overflow-hidden bg-transparent outline-none border-none text-sm text-gray-200 placeholder:text-gray-300 px-5 py-5 pr-16"
                     />
 
-                    // Send button
                     <button
                         type="submit"
                         disabled={loading}
                         className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-indigo-400 hover:scale-110 active:scale-95"
                     >
-                        {message.trim() ? <Send size={18} /> : <SendHorizontal size={20} strokeWidth={2} />}
+                        {message.trim() ? (
+                            <Send size={18} />
+                        ) : (
+                            <SendHorizontal size={20} strokeWidth={2} />
+                        )}
                     </button>
+                </div>
+
+                <div className="mt-2 text-center">
+                    <a
+                        href="/privacy-policy"
+                        className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-200"
+                    >
+                        Qevro-Ai Privacy Policy @2026
+                    </a>
                 </div>
             </form>
         </div>

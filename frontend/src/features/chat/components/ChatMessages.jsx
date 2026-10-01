@@ -3,11 +3,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import EmptyChat from './EmptyChat.jsx';
 
-const ChatMessages = ({ messages, loading, isEmptyChat, messagesEndRef }) => {
+const ChatMessages = ({ messages, loading, isEmptyChat, messagesEndRef, username }) => {
     return (
         <div className="relative flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 py-6 sm:px-6 sm:py-8 lg:px-8 bg-[#05070b]">
             {isEmptyChat ? (
-                <EmptyChat />
+                <EmptyChat username={username} />
             ) : (
                 <div className="relative max-w-5xl mx-auto space-y-1">
                     {messages.map((item) => (

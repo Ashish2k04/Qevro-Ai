@@ -38,7 +38,9 @@ const Register = () => {
 
     } catch (err) {
 
-      const backendErrors = err.response?.data?.error;
+      const backendErrors =
+        err.response?.data?.error ||
+        err.response?.data?.errors;
 
       if (Array.isArray(backendErrors)) {
 
@@ -149,7 +151,8 @@ const Register = () => {
                   setName(val.target.value);
                   setErrors(prev => ({
                     ...prev,
-                    username: ''
+                    username: '',
+                    general: ''
                   }));
                 }}
               />
@@ -183,7 +186,8 @@ const Register = () => {
                   setEmail(val.target.value);
                   setErrors(prev => ({
                     ...prev,
-                    email: ''
+                    email: '',
+                    general: ''
                   }));
                 }}
               />
@@ -219,7 +223,8 @@ const Register = () => {
                     setPassword(val.target.value);
                     setErrors(prev => ({
                       ...prev,
-                      password: ''
+                      password: '',
+                      general: ''
                     }));
                   }}
                 />

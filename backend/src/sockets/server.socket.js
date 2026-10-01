@@ -1,3 +1,4 @@
+import "dotenv/config";
 import {Server} from 'socket.io';
 
 let io;
@@ -5,7 +6,7 @@ let io;
 export const intializeSocket = (httpServer) =>{
     io = new Server(httpServer, {
         cors: {
-            origin: "https://qevro-ai.vercel.app",
+            origin: process.env.FRONTEND_URI,
             credentials: true
         }
     });

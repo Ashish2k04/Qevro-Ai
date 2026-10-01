@@ -8,10 +8,24 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [errors, setErrors] = useState({
+    username: '',
+    email: '',
+    password: '',
+    general: ''
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setErrors({
+      username: '',
+      email: '',
+      password: '',
+      general: ''
+    });
 
     try {
       const data = await register({
@@ -21,8 +35,50 @@ const Register = () => {
       });
 
       console.log(data);
+
     } catch (err) {
-      console.log(err);
+
+      const backendErrors = err.response?.data?.error;
+
+      if (Array.isArray(backendErrors)) {
+
+        const newErrors = {
+          username: '',
+          email: '',
+          password: '',
+          general: ''
+        };
+
+        backendErrors.forEach((error) => {
+
+          if (error.path === 'username') {
+            newErrors.username = error.msg;
+          }
+
+          if (error.path === 'email') {
+            newErrors.email = error.msg;
+          }
+
+          if (error.path === 'password') {
+            newErrors.password = error.msg;
+          }
+
+        });
+
+        setErrors(newErrors);
+
+      } else {
+
+        setErrors({
+          username: '',
+          email: '',
+          password: '',
+          general:
+            err.response?.data?.message ||
+            'Something went wrong. Please try again.'
+        });
+
+      }
     }
   };
 
@@ -89,8 +145,20 @@ const Register = () => {
                 placeholder:text-gray-400
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 value={name}
-                onChange={(val) => { setName(val.target.value) }}
+                onChange={(val) => {
+                  setName(val.target.value);
+                  setErrors(prev => ({
+                    ...prev,
+                    username: ''
+                  }));
+                }}
               />
+
+              {errors.username && (
+                <p className="mt-2 text-xs text-red-400">
+                  {errors.username}
+                </p>
+              )}
             </div>
 
             {/* Email */}
@@ -111,8 +179,20 @@ const Register = () => {
                 placeholder:text-gray-400
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 value={email}
-                onChange={(val) => { setEmail(val.target.value) }}
+                onChange={(val) => {
+                  setEmail(val.target.value);
+                  setErrors(prev => ({
+                    ...prev,
+                    email: ''
+                  }));
+                }}
               />
+
+              {errors.email && (
+                <p className="mt-2 text-xs text-red-400">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             {/* Password */}
@@ -135,7 +215,13 @@ const Register = () => {
                   placeholder:text-gray-400
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   value={password}
-                  onChange={(val) => { setPassword(val.target.value) }}
+                  onChange={(val) => {
+                    setPassword(val.target.value);
+                    setErrors(prev => ({
+                      ...prev,
+                      password: ''
+                    }));
+                  }}
                 />
 
                 <button
@@ -153,7 +239,20 @@ const Register = () => {
                 </button>
 
               </div>
+
+              {errors.password && (
+                <p className="mt-2 text-xs text-red-400">
+                  {errors.password}
+                </p>
+              )}
             </div>
+
+            {/* General Error */}
+            {errors.general && (
+              <p className="text-xs text-red-400 text-center">
+                {errors.general}
+              </p>
+            )}
 
             {/* Register Button */}
             <button
@@ -201,7 +300,6 @@ const Register = () => {
         </div>
       </div>
 
-
       {/* RIGHT — Qevro AI */}
       <div
         className="hidden lg:flex w-1/2 m-4 ml-0 rounded-r-3xl
@@ -223,7 +321,6 @@ const Register = () => {
         {/* Content */}
         <div className="relative text-center px-10 max-w-xl">
 
-          {/* Main Heading */}
           <h2
             className="text-5xl font-semibold tracking-tight
             text-white leading-tight"
@@ -236,7 +333,6 @@ const Register = () => {
             </span>
           </h2>
 
-          {/* Features */}
           <p
             className="mt-6 text-gray-400 text-sm
             leading-6 max-w-md mx-auto"

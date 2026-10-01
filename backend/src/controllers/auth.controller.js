@@ -223,7 +223,11 @@ async function getMeController(req,res,next) {
 
 async function logOutController(req, res, next){
     try{
-       res.clearCookie("token");
+       res.clearCookie("token", {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none"
+       });
 
        return res.status(200).json({
         message: "User logout successfully.",

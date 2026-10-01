@@ -217,39 +217,6 @@ async function getMeController(req,res,next) {
   }
 }
 
-async function resetPasswordController(req,res,next){
-
-    try{
-    const userId = req.user.id;
-
-    const userExists = await userModel.findById(userId);
-
-    if(!userExists){
-        return res.status(404).json({
-            message: "User not exists.",
-            success: false
-        })
-    }
-
-    userExists.password = req.body.password
-
-    await userExists.save();
-
-    return res.status(200).json({
-        message: "Password changed!",
-        info:{
-            username: userExists.username,
-            email: userExists.email
-        }
-    })
-    }
-    catch(err){
-        err.status = 500;
-        next(err);
-    }
-
-}
-
 async function logOutController(req, res, next){
     try{
        res.clearCookie("token");
@@ -267,4 +234,4 @@ async function logOutController(req, res, next){
 
 
 export {registerCtrl, verifyEmail, loginCtrl, 
-        getMeController, resetPasswordController, logOutController};
+        getMeController, logOutController};

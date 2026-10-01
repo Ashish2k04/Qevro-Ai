@@ -46,7 +46,7 @@ const searchInternetTool = tool(
 const agent = createAgent({
     model: gemini,
     tools: [searchInternetTool],
-    // middleware: [modelFallbackMiddleware(groq)]
+    middleware: [modelFallbackMiddleware(groq)]
 })
 
 export async function askAi(PROMPT) {

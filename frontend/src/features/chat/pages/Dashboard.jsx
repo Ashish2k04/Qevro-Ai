@@ -10,6 +10,7 @@ import ChatSidebar from '../components/ChatSidebar.jsx';
 import ChatMessages from '../components/ChatMessages.jsx';
 import ChatInput from '../components/ChatInput.jsx';
 import DeleteChatModal from '../components/DeleteChatModal.jsx';
+import LogoutModal from '../components/LogoutModal.jsx';
 import { PanelLeftOpen } from 'lucide-react';
 
 const Dashboard = () => {
@@ -35,6 +36,7 @@ const Dashboard = () => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [deleteChatId, setDeleteChatId] = useState(null);
+    const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
     // AUTO SCROLL
     const messagesEndRef = useRef(null);
@@ -255,6 +257,22 @@ const Dashboard = () => {
         setDeleteChatId(null);
     };
 
+    // OPEN LOGOUT CONFIRMATION
+    const handleLogout = () => {
+        setLogoutModalOpen(true);
+    };
+
+    // CONFIRM LOGOUT
+    const confirmLogout = () => {
+        auth.handleLogOut();
+        setLogoutModalOpen(false);
+    };
+
+    // CANCEL LOGOUT
+    const cancelLogout = () => {
+        setLogoutModalOpen(false);
+    };
+
     // ENTER KEY SEND
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -262,10 +280,6 @@ const Dashboard = () => {
             handleSend(e);
         }
     };
-
-    const handleLogout = () => {
-        auth.handleLogOut()
-    }
 
     // EMPTY CHAT CHECK
     const isEmptyChat =
@@ -327,6 +341,12 @@ const Dashboard = () => {
                     deleteChatId={deleteChatId}
                     confirmDeleteChat={confirmDeleteChat}
                     cancelDeleteChat={cancelDeleteChat}
+                />
+
+                <LogoutModal
+                    logoutModalOpen={logoutModalOpen}
+                    confirmLogout={confirmLogout}
+                    cancelLogout={cancelLogout}
                 />
             </div>
         </div>

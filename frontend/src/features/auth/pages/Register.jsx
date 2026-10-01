@@ -171,6 +171,16 @@ const Register = () => {
 
           </div>
 
+          {/* Privacy Policy */}
+          <div className="flex items-center justify-center mt-4">
+            <Link
+              to={'/privacy-policy'}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-200"
+            >
+              Privacy Policy
+            </Link>
+          </div>
+
         </div>
       </div>
 
@@ -216,7 +226,7 @@ const Register = () => {
             className="mt-6 text-gray-400 text-sm
             leading-6 max-w-md mx-auto"
           >
-            Send emails, search the web, get up-to-date results,
+            Search the web, get up-to-date results,
             and let Qevro-AI handle the work for you.
           </p>
 

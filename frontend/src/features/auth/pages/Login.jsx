@@ -183,6 +183,16 @@ const Login = () => {
 
           </div>
 
+          {/* Privacy Policy */}
+          <div className="flex items-center justify-center mt-4">
+            <Link
+              to={'/privacy-policy'}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-200"
+            >
+              Privacy Policy
+            </Link>
+          </div>
+
         </div>
       </div>
 

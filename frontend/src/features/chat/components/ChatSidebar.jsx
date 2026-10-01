@@ -53,7 +53,7 @@ const ChatSidebar = ({
                                     <button
                                         type="button"
                                         onClick={(e) => handleDeleteChat(e, chatItem.id)}
-                                        className="shrink-0 ml-3 text-gray-400/70 hover:text-gray-300 cursor-pointer transition-all duration-200 hover:scale-110"
+                                        className="shrink-0 ml-3 text-gray-400/70 hover:text-gray-300 cursor-pointer transition-all duration-200"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -65,8 +65,8 @@ const ChatSidebar = ({
                     <div className="pt-4 border-t border-gray-800 flex items-center justify-between">
                         <button
                             type="button"
-                            className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center cursor-pointer hover:bg-red-400 hover:scale-105 transition-all duration-200"
                             onClick={handleLogoutChat}
+                            className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center cursor-pointer hover:bg-red-400 hover:scale-105 transition-all duration-200"
                         >
                             <LogOut size={19} />
                         </button>

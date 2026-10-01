@@ -242,7 +242,7 @@ const Login = () => {
             className="mt-6 text-gray-400 text-sm
             leading-6 max-w-md mx-auto"
           >
-            Send emails, search the web, get up-to-date results,
+            Search the web, get up-to-date results,
             and let Qevro-AI handle the work for you.
           </p>
 

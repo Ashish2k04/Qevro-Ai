@@ -1,6 +1,6 @@
 # Qevro-Ai
 
-An AI-powered search engine built with the MERN stack.
+An AI Powered search engine built with the MERN stack and LangChain.
 
 > 🚧 **This project is still under development.**
 

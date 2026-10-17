@@ -1,35 +1,19 @@
-import 'dotenv/config'
-import {createTransport} from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = createTransport({
-    service: 'gmail',
-    auth:{
-        type: 'OAuth2',
-        user: process.env.GOOGLE_USER,
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-    },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-transporter.verify()
-.then(()=>{
-    console.log('Email transporter is ready to send emails.')
-})
-.catch((err)=>{
-   console.log(`Something went wrong in email transporter: ${err.message}`)
-})
-
-export async function sendEmail({to, subject, html, text}) {
-    const mailOptions = {
-        from: process.env.GOOGLE_USER,
+export async function sendEmail({ to, subject, html, text }) {
+    const { data, error } = await resend.emails.send({
+        from: 'Qevro-AI <onboarding@resend.dev>',
         to,
         subject,
         html,
         text
-    };
+    });
 
-    const details = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", details);
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    console.log('Email sent:', data?.id);
 }
-

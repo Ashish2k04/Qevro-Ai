@@ -12,6 +12,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const [errors, setErrors] = useState({
     username: '',
@@ -30,6 +31,7 @@ const Register = () => {
       general: ''
     });
 
+    setIsLoading(true);
     try {
       const data = await register({
         username: name,
@@ -85,6 +87,8 @@ const Register = () => {
         });
 
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -279,13 +283,20 @@ const Register = () => {
               {/* Register Button */}
               <button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 rounded-lg bg-indigo-600 text-white
               text-sm font-medium cursor-pointer
               transition-all duration-200
               hover:bg-indigo-500 hover:scale-[1.02]
-              active:scale-[0.98]"
+              active:scale-[0.98] disabled:opacity-80 disabled:cursor-not-allowed disabled:scale-100"
               >
-                Create account
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{animationDelay:'0ms'}}/>
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{animationDelay:'150ms'}}/>
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{animationDelay:'300ms'}}/>
+                  </span>
+                ) : 'Create account'}
               </button>
 
             </form>

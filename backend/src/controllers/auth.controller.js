@@ -44,23 +44,24 @@ async function registerCtrl(req, res, next) {
             process.env.JWT_SECRET
         );
 
-        await sendEmail({
+        try {
+            await sendEmail({
+                to: created.email,
+                subject: "Welcome to Qevro-Ai",
+                html: `<p>Hello ${created.username}</p>
+                <p>Thank you for registering at <strong>Qevro-Ai</strong>, We're exicted to have you on board! 🥳</p>
+                <p>Please verify your email address by clicking the link below:</p>
 
-            to: created.email,
+                <a href="${process.env.BACKEND_URI || 'https://qevro-ai.onrender.com'}/api/verify-email?token=${token}">
+                    Verify Email.
+                </a>
 
-            subject: "Welcome to Qevro-Ai",
-
-            html: `<p>Hello ${created.username}</p>
-            <p>Thank you for registering at <strong>Qevro-Ai</strong>, We're exicted to have you on board! 🥳</p>
-            <p>Please verify your email address by clicking the link below:</p>
-
-            <a href="${process.env.BACKEND_URI || 'https://qevro-ai.onrender.com'}/api/verify-email?token=${token}">
-                Verify Email.
-            </a>
-
-            <p>If you did not created an account, please ignore this email.</p>
-            <p>Best regards, <br>The Qevro-Ai Team</p>`
-        })
+                <p>If you did not created an account, please ignore this email.</p>
+                <p>Best regards, <br>The Qevro-Ai Team</p>`
+            });
+        } catch (mailErr) {
+            console.error('Failed to send verification email:', mailErr.message);
+        }
 
         return res.status(201).json({
 

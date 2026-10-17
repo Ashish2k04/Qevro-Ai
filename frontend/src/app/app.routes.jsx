@@ -1,25 +1,25 @@
-import {createBrowserRouter} from 'react-router';
+import { createBrowserRouter } from 'react-router';
 import Login from '../features/auth/pages/Login.jsx';
 import Register from '../features/auth/pages/Register.jsx';
 import Dashboard from '../features/chat/pages/Dashboard.jsx';
 import Protected from '../features/auth/components/Protected.jsx';
-import PrivacyPolicy from '../features/pages/PrivacyPolicy.jsx';
+//import PrivacyPolicy from '../features/pages/PrivacyPolicy.jsx';
 
 export const appRoutes = createBrowserRouter([
     {
-        element: <Login/>,
+        element: <Login />,
         path: '/login'
     },
     {
-        element: <Register/>,
+        element: <Register />,
         path: '/register'
     },
     {
-        element:  <Protected><Dashboard /></Protected>,
+        element: <Protected><Dashboard /></Protected>,
         path: '/'
     },
-    {
-        element:  <PrivacyPolicy/>,
-        path: '/privacy-policy'
-    },
+    // {
+    //     element:  <PrivacyPolicy/>,
+    //     path: '/privacy-policy'
+    // },
 ])

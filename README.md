@@ -1,6 +1,6 @@
 # Qevro-Ai
 
-🚀 **Live Demo:** https://qevro-ai.vercel.app
+🚀 [Live Demo](https://qevro-ai.vercel.app)
 
 Qevro-Ai is an AI-powered search and conversation application built with the MERN stack and LangChain. Users can register and verify their email, sign in, ask AI questions, search the web for current information, and revisit or delete previous conversations.
 

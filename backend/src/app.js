@@ -12,7 +12,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(cors({
-    origin: process.env.FRONTEND_URI,
+    origin: [
+        'http://localhost:5173',
+        process.env.FRONTEND_URI || 'https://qevro-ai.vercel.app'
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }));
